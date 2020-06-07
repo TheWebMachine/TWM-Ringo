@@ -26,7 +26,7 @@ MAKERphone mp;
 void setup()
 {
   mp.begin(1);
-  
+  mp.inCall=1;
   mp.display.setTextColor(TFT_BLACK);
   mp.display.setTextSize(1);
   mp.display.setTextFont(2);
@@ -82,6 +82,11 @@ void loop()
         {
           // Do a little cleanup before we leave
           udp.stop();
+          WiFi.scanDelete();
+          WiFi.disconnect(true); delay(10); // disable WIFI altogether
+          WiFi.mode(WIFI_MODE_NULL); delay(10);
+          while(!mp.update());
+          mp.inCall=0;
           
           //Go Home
           mp.loader();
@@ -123,6 +128,11 @@ void loop()
         {
           // Do a little cleanup before we leave
           udp.stop();
+          WiFi.scanDelete();
+          WiFi.disconnect(true); delay(10); // disable WIFI altogether
+          WiFi.mode(WIFI_MODE_NULL); delay(10);
+          while(!mp.update());
+          mp.inCall=0;
           
           //Go Home
           mp.loader();
