@@ -381,6 +381,8 @@ void wifiConnect()
             char temp2[content.length()+1];
             networkNames[selection].toCharArray(temp, networkNames[selection].length()+1);
             content.toCharArray(temp2, content.length()+1);
+            Serial.print("Connecting to ");
+            Serial.println(temp);
             WiFi.begin(temp, temp2);
             uint8_t counter = 0;
             while (WiFi.status() != WL_CONNECTED)
@@ -394,6 +396,7 @@ void wifiConnect()
                 mp.display.fillRect(0, 40, mp.display.width(), 60, TFT_BLACK);
                 mp.display.setCursor(0, 45);
                 mp.display.printCenter("Wrong password :(");
+                Serial.println("Wrong password :(");
                 uint32_t tempMillis = millis();
                 while(millis() < tempMillis + 2000)
                 {
@@ -438,6 +441,7 @@ void wifiConnect()
               mp.display.fillRect(0, 28, 160, 100, TFT_BLACK);
               mp.display.setCursor(0,40);
               mp.display.printCenter("Connected!");
+              Serial.println("Connection successful!");
               mp.display.setCursor(60, 60);
               while(!mp.update());
               delay(1000);
