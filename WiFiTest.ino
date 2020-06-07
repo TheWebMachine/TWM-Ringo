@@ -15,10 +15,10 @@
 // momentary pauses in updating the date/time while the UDP request is retried; occasional datagram loss is
 // expected as such is the nature of UDP.
 
-// See highlighted comments below to customize program for your network and DNS testing.
+// See highlighted comments below to customize IP/DNS settings.
 
-// Example coded 5/10/2020 by Frank Prindle.
-// Additional code added by TheWebMachine 6/6/2020 onward
+// Example originally coded 5/10/2020 by Frank Prindle.
+// Additional code added by TheWebMachine 6/6/2020 onward (most of which sourced from https://github.com/CircuitMess/)
 
 #include "MAKERphone.h"
 MAKERphone mp;
@@ -26,13 +26,17 @@ MAKERphone mp;
 void setup()
 {
   mp.begin(1);
-
-  /*-----------------------------------------------------------*/
-  /* Set the following two strings to match your WiFi network. */
-  /*-----------------------------------------------------------*/
-  char *SSID = "MyNetwork";
-  char *WPAPassword = "abcde12345";
-
+  
+  mp.display.setTextColor(TFT_BLACK);
+  mp.display.setTextSize(1);
+  mp.display.setTextFont(2);
+  mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+  mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+  mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+  mp.display.setCursor(47, 54);
+  mp.display.printCenter("Searching for networks");
+  while(!mp.update());
+  wifiConnect();
   /*-------------------------------------------------------------------*/
   /* Disable the following line to use DHCP supplied DNS server.       */
   /* Enable the following line to use a well-known DNS server.         */
@@ -43,25 +47,6 @@ void setup()
   /*-------------------------------------------------------------------*/
   //WiFi.config(IPAddress(192,168,1,177),IPAddress(192,168,1,1),IPAddress(255,255,255,0),IPAddress(8,8,8,8));
   
-  WiFi.begin(SSID,WPAPassword);
-  int count=100;
-  while(WiFi.status() != WL_CONNECTED && count--) delay(100);
-  mp.display.setTextFont(1);
-  mp.display.fillScreen(TFT_BLACK);
-  if(WiFi.status() != WL_CONNECTED)
-  {
-    Serial.printf("WiFi cannot connect to given SSID with given password\n");
-    statusline("WiFi Connect Failure", true);
-    delay(5000);
-    statusline("WiFi Connect Failure", false);
-  }
-  else
-  {
-    Serial.printf("WiFi is connected\n");
-    statusline("WiFi Is Connected", true);
-    delay(2000);
-    statusline("WiFi Is Connected", false);
-  }
 }
 
 void loop()
@@ -91,6 +76,17 @@ void loop()
   {
     statusline("NTP Waiting For Response", true);
     delay(20);
+    // See if user pressed B or Home to return to loader
+      mp.buttons.update();
+      if(mp.buttons.released(BTN_B) || mp.buttons.released(BTN_HOME))
+        {
+          // Do a little cleanup before we leave
+          udp.stop();
+          
+          //Go Home
+          mp.loader();
+          break;
+        }
   }
   statusline("NTP Waiting For Response", false);
   if(count)
@@ -125,8 +121,10 @@ void loop()
       mp.buttons.update();
       if(mp.buttons.released(BTN_B) || mp.buttons.released(BTN_HOME))
         {
-          // Do a little cleanup (close UDP stream) before we leave
+          // Do a little cleanup before we leave
           udp.stop();
+          
+          //Go Home
           mp.loader();
           break;
         }
@@ -154,4 +152,474 @@ void statusline(char *msg, bool on)
   mp.display.print(msg);
   mp.display.pushSprite(0,0);
 
+}
+
+// Borrowed this from git:CircuitMess/CircuitMess-Ringo-firmware/blob/master/src/settingsApp.cpp
+void wifiConnect()
+{
+  // if(!mp.wifi)
+  // {
+  //  mp.display.setTextColor(TFT_BLACK);
+  //  mp.display.setTextSize(1);
+  //  mp.display.setTextFont(2);
+  //  mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+  //  mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+  //  mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+  //  mp.display.setCursor(47, 54);
+  //  mp.display.printCenter("WiFi turned off!");
+  //  uint32_t tempMillis = millis();
+  //  while(millis() < tempMillis + 2000)
+  //  {
+  //    mp.update();
+  //    if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+  //    {
+  //      while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+  //        mp.update();
+  //      break;
+  //    }
+  //  }
+  //  mp.update();
+  // }
+  bool blinkState = 1;
+  unsigned long elapsedMillis = millis();
+  bool helpPop;
+  String content = ""; //password string
+  String prevContent = "";
+  delay(500);
+  WiFi.begin();
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  delay(1000);
+  int n = WiFi.scanNetworks();
+  // delay(1000);
+  Serial.println("scan done");
+  Serial.println(n);
+  if (n < 1) {
+    mp.display.setTextColor(TFT_BLACK);
+    mp.display.setTextSize(1);
+    mp.display.setTextFont(2);
+    mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+    mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+    mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+    mp.display.setCursor(47, 54);
+    mp.display.printCenter("No networks found!");
+    WiFi.scanDelete();
+    WiFi.disconnect(true); delay(10); // disable WIFI altogether
+    WiFi.mode(WIFI_MODE_NULL); delay(10);
+    while(!mp.update());
+    uint32_t tempMillis = millis();
+    WiFi.begin();
+    while(millis() < tempMillis + 2000)
+    {
+      mp.update();
+      if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+      {
+        while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+          mp.update();
+        break;
+      }
+    }
+    while(!mp.update());
+
+  }
+  else
+  {
+    String networkNames[n];
+    String wifiSignalStrengths[n];
+    bool wifiPasswordNeeded[n];
+    Serial.print(n);
+    Serial.println(" networks found");
+    for (int i = 0; i < n; ++i) {
+      // Print SSID and RSSI for each network found
+      networkNames[i] = WiFi.SSID(i);
+      wifiSignalStrengths[i] = WiFi.RSSI(i);
+      wifiPasswordNeeded[i] = !(WiFi.encryptionType(i) == WIFI_AUTH_OPEN);
+      Serial.print(i + 1);
+      Serial.print(": ");
+      Serial.print(WiFi.SSID(i));
+      Serial.print(" (");
+      Serial.print(WiFi.RSSI(i));
+      Serial.print(")");
+      Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " " : "*");
+      delay(10);
+    }
+    while(1)
+    {
+
+      int8_t selection = wifiNetworksMenu(networkNames, wifiSignalStrengths, n);
+      if(selection < 0)
+      {
+        while(!mp.update());
+        return;
+      }
+      
+      if (wifiPasswordNeeded[selection])
+      {
+        mp.textInput("");
+        prevContent = "";
+        content = "";
+        mp.textPointer = 0;
+        while(!mp.update());
+        while (1)
+        {
+          mp.display.fillScreen(TFT_BLACK);
+          mp.display.setCursor(8, 0);
+          mp.display.printCenter(networkNames[selection]);
+          mp.display.setCursor(4, 30);
+          mp.display.printCenter("Enter password:");
+          mp.display.setCursor(1, 112);
+          mp.display.print("Erase");
+          mp.display.setCursor(22, 83);
+          mp.display.print("Press A to confirm");
+          //mp.display.setCursor(133, 112);
+          //mp.display.print("Help");
+          if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine
+          {
+            elapsedMillis = millis();
+            blinkState = !blinkState;
+          }
+
+          mp.display.setTextFont(2);
+          mp.display.fillRect(1, 55, mp.display.width(), 20, TFT_DARKGREY);
+          mp.display.setTextColor(TFT_WHITE);
+          mp.display.setCursor(1, 6);
+          prevContent = content;
+          content = mp.textInput(content, 63);
+          if (prevContent != content)
+          {
+            blinkState = 1;
+            elapsedMillis = millis();
+          }
+
+          mp.display.setCursor(4, 56);
+          mp.display.setTextFont(2);
+          mp.display.print(content);
+          mp.display.setTextWrap(0);
+          Serial.println(mp.display.cursor_x);
+          if (mp.display.cursor_x + 8 >= mp.display.width())
+          {
+            mp.display.fillRect(1, 55, mp.display.width(), 20, TFT_DARKGREY);
+            mp.display.setCursor(mp.display.width() - mp.display.cursor_x - 4, 56);
+            mp.display.print(content);
+          }
+          if (blinkState == 1)
+            mp.display.drawFastVLine(mp.display.getCursorX(), mp.display.getCursorY(), 16, TFT_WHITE);
+
+          /*if(mp.buttons.released(BTN_FUN_RIGHT)){
+              helpPop = !helpPop;
+              mp.display.drawIcon(TextHelperPopup, 0, 0, 160, 128, 1, TFT_WHITE); 
+              while(!mp.update());
+            }
+            while (helpPop) {
+              if(mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_B)){
+                helpPop = !helpPop;
+              }
+            mp.update();
+            }*/
+          if((mp.buttons.released(BTN_A)) && content.length() > 0)
+          {
+            Serial.println("PRESSED");
+            mp.display.setCursor(20, 50);
+            mp.display.fillRect(0, 28, 160, 100, TFT_BLACK);
+            mp.display.setCursor(0,40);
+            mp.display.printCenter("Connecting");
+            mp.display.setCursor(60, 60);
+            while(!mp.update());
+
+            char temp[networkNames[selection].length()+1];
+            char temp2[content.length()+1];
+            networkNames[selection].toCharArray(temp, networkNames[selection].length()+1);
+            content.toCharArray(temp2, content.length()+1);
+            WiFi.begin(temp, temp2);
+            uint8_t counter = 0;
+            while (WiFi.status() != WL_CONNECTED)
+            {
+              delay(1500);
+              mp.display.print(".");
+              while(!mp.update());
+              counter++;
+              if (counter >= 8)
+              {
+                mp.display.fillRect(0, 40, mp.display.width(), 60, TFT_BLACK);
+                mp.display.setCursor(0, 45);
+                mp.display.printCenter("Wrong password :(");
+                uint32_t tempMillis = millis();
+                while(millis() < tempMillis + 2000)
+                {
+                  mp.update();
+                  if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+                  {
+                    while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+                      mp.update();
+                    break;
+                  }
+                }
+                while(!mp.update());
+                break;
+              }
+            }
+            Serial.print("Wifi status: ");
+            Serial.println(WiFi.status());
+            // if(WiFi.status() == WL_DISCONNECTED)
+            // {
+              
+            //  mp.display.fillRect(0, 40, mp.display.width(), 60, TFT_BLACK);
+            //  mp.display.setCursor(0, 45);
+            //  mp.display.printCenter("Wrong password :(");
+            //  uint32_t tempMillis = millis();
+            //  while(millis() < tempMillis + 2000)
+            //  {
+            //    mp.update();
+            //    if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+            //    {
+            //      while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+            //        mp.update();
+            //      break;
+            //    }
+            //  }
+            //  while(!mp.update());
+            //  break;
+            // }
+            if(WiFi.status() == WL_CONNECTED)
+            {
+              mp.update();
+              mp.display.setCursor(20, 50);
+              mp.display.fillRect(0, 28, 160, 100, TFT_BLACK);
+              mp.display.setCursor(0,40);
+              mp.display.printCenter("Connected!");
+              mp.display.setCursor(60, 60);
+              while(!mp.update());
+              delay(1000);
+              mp.display.setTextSize(0);
+              mp.display.setTextFont(1);
+              mp.display.fillScreen(TFT_BLACK);
+              mp.display.setCursor(0, 0);
+              return;
+            }
+
+          }
+          if(mp.buttons.released(BTN_B))
+          {
+            while(!mp.update());
+            break;
+          }
+          mp.update();
+        }
+      }
+      else
+      {
+        mp.display.fillScreen(TFT_BLACK);
+        mp.display.setCursor(8, 8);
+        mp.display.printCenter(networkNames[selection]);
+        mp.display.setCursor(0,40);
+        mp.display.printCenter("Connecting");
+        mp.display.setCursor(60, 60);
+        while(!mp.update());
+
+        char temp[networkNames[selection].length()+1];
+        networkNames[selection].toCharArray(temp, networkNames[selection].length()+1);
+        Serial.println(temp);
+        WiFi.begin(temp);
+        uint8_t counter = 0;
+        while (WiFi.status() != WL_CONNECTED)
+        {
+          delay(1000);
+          mp.display.print(".");
+          while(!mp.update());
+          counter++;
+          if (counter >= 8)
+          {
+            mp.display.fillRect(0, 40, mp.display.width(), 60, TFT_BLACK);
+            mp.display.setCursor(0, 45);
+            mp.display.printCenter("Wi-Fi error!");
+            uint32_t tempMillis = millis();
+            while(millis() < tempMillis + 2000)
+            {
+              mp.update();
+              if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+              {
+                while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+                  mp.update();
+                break;
+              }
+            }
+            while(!mp.update());
+            break;
+          }
+        }
+        if(WiFi.status() == WL_DISCONNECTED)
+        {
+          
+          mp.display.fillRect(0, 40, mp.display.width(), 60, TFT_BLACK);
+          mp.display.setCursor(0, 45);
+          mp.display.printCenter("Wi-Fi error!");
+          uint32_t tempMillis = millis();
+          while(millis() < tempMillis + 2000)
+          {
+            mp.update();
+            if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+            {
+              while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+                mp.update();
+              break;
+            }
+          }
+          while(!mp.update());
+          break;
+        }
+        else if(WiFi.status() == WL_CONNECTED)
+        {
+          mp.update();
+          mp.display.setCursor(20, 50);
+          mp.display.fillRect(0, 28, 160, 100, TFT_BLACK);
+          mp.display.setCursor(0,40);
+          mp.display.printCenter("Connected!");
+          mp.display.setCursor(60, 60);
+          while(!mp.update());
+          delay(1000);
+          mp.display.setTextSize(0);
+          mp.display.setTextFont(1);
+          mp.display.fillScreen(TFT_BLACK);
+          mp.display.setCursor(0, 0);
+          return;
+        }
+      }
+    }
+  }
+}
+
+int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
+  int32_t cameraY = 0;
+  int32_t cameraY_actual = 0;
+  uint8_t offset = 22;
+  uint8_t boxHeight = 20;
+  int16_t cursor = 0;
+  bool blinkState = 0;
+  uint32_t blinkMillis = millis();
+  if (length > 12) {
+    cameraY = -cursor * (boxHeight + 2) - 1;
+  }
+  while (1) {
+
+    mp.display.fillScreen(TFT_BLACK);
+    mp.display.setCursor(0, 0);
+    cameraY_actual = (cameraY_actual + cameraY) / 2;
+    if (cameraY_actual - cameraY == 1) {
+      cameraY_actual = cameraY;
+    }
+    if(millis() - blinkMillis > 350)
+    {
+      blinkMillis = millis();
+      blinkState = !blinkState;
+    }
+    for (uint8_t i = 0; i < length; i++)
+      wifiDrawBox(items[i], signals[i], i, cameraY_actual);
+    if(blinkState)
+      wifiDrawCursor(cursor, cameraY_actual);
+
+    mp.display.fillRect(0, 0, mp.display.width(), 20, TFT_DARKGREY);
+    mp.display.setTextFont(2);
+    mp.display.setCursor(2,1);
+    mp.display.drawFastHLine(0, 19, mp.display.width(), TFT_WHITE);
+    mp.display.setTextSize(1);
+    mp.display.setTextColor(TFT_WHITE);
+    mp.display.print("Choose a network");
+    mp.display.fillRect(0, 111, mp.display.width(), 30, TFT_DARKGREY);
+    mp.display.setTextFont(2);
+    mp.display.setCursor(2,112);
+    mp.display.drawFastHLine(0, 111, mp.display.width(), TFT_WHITE);
+    mp.display.printCenter("Cancel            Select");
+    if(mp.released(BTN_FUN_RIGHT))
+    {
+      while(!mp.update());
+      mp.playNotificationSound(cursor);
+    }
+
+    if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) {   //BUTTON CONFIRM
+      while(!mp.update());
+      break;
+    }
+    if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
+      blinkState = 1;
+      blinkMillis = millis();
+      while(!mp.update());
+      if (cursor == 0) {
+        cursor = length - 1;
+        if (length > 4) {
+          cameraY = -(cursor - 3) * (boxHeight + 1);
+        }
+      }
+      else {
+        if (cursor > 0 && (cursor * (boxHeight + 1)  + cameraY + offset) <= 30) {
+          cameraY += (boxHeight + 1);
+        }
+        cursor--;
+      }
+
+    }
+
+    if (mp.buttons.pressed(BTN_DOWN)) { //BUTTON DOWN
+      blinkState = 1;
+      blinkMillis = millis();
+      while(!mp.update());
+      cursor++;
+      if ((cursor * (boxHeight + 1) + cameraY + offset) > 100) {
+        cameraY -= (boxHeight + 1);
+      }
+      if (cursor >= length) {
+        cursor = 0;
+        cameraY = 0;
+
+      }
+
+    }
+    if (mp.buttons.released(BTN_B) || mp.buttons.released(BTN_FUN_LEFT)) //BUTTON BACK
+    {
+      while(!mp.update());
+      return -1;
+    }
+    mp.update();
+  }
+  return cursor;
+
+}
+void wifiDrawBox(String text, String signalStrength, uint8_t i, int32_t y) {
+  uint8_t offset = 23;
+  uint8_t boxHeight = 20;
+  y += i * (boxHeight + 2) + offset;
+  if (y < 0 || y > mp.display.height()) {
+    return;
+  }
+  mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 1, TFT_DARKGREY);
+  mp.display.setTextColor(TFT_WHITE);
+  mp.display.setCursor(5, y+2);
+  for(uint16_t i = 0; i < text.length(); i++)
+  {
+    mp.display.print(text[i]);
+    if(mp.display.getCursorX() > 120)
+    {
+      mp.display.print("...");
+      break;
+    }
+  }
+  int strength = signalStrength.toInt();
+  //> -50 full
+  // < -40 && > -60 high
+  // < -60 && > -85 low
+  // < -95 nosignal
+  if(strength > -50)
+    mp.display.drawBitmap(140, y+2, signalFullIcon, TFT_WHITE, 2);
+  else if(strength <= -50 && strength > -70)
+    mp.display.drawBitmap(140, y+2, signalHighIcon, TFT_WHITE, 2);
+  else if(strength <= -70 && strength > -95)
+    mp.display.drawBitmap(140, y+2, signalLowIcon, TFT_WHITE, 2);
+  else if(strength <= -95)
+    mp.display.drawBitmap(140, y+2, noSignalIcon, TFT_WHITE, 2);
+}
+void wifiDrawCursor(uint8_t i, int32_t y) {
+  uint8_t offset = 23;
+  uint8_t boxHeight = 20;
+  y += i * (boxHeight + 2) + offset;
+  mp.display.drawRect(1, y, mp.display.width() - 2, boxHeight + 1, TFT_RED);
+  mp.display.drawRect(0, y-1, mp.display.width(), boxHeight + 3, TFT_RED);
 }
