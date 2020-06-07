@@ -28,6 +28,7 @@ void setup()
   Serial.begin(115200);
   mp.begin(1);
   mp.inCall=1;  // We need to disable the sleep timer. If allowed to engage sleep, device will reboot upon "wake". Screen doesn't actually turn off, tho.
+  mp.homePopupEnable(0);   // Disable homePopup()
   mp.display.setTextColor(TFT_BLACK);
   mp.display.setTextSize(1);
   mp.display.setTextFont(2);
@@ -80,8 +81,8 @@ void loop()
     statusline("NTP Waiting For Response", true);
     Serial.println("NTP Waiting For Response");
     delay(20);
-    // Press B or Home to return to loader
       mp.buttons.update();
+      // Press HOME or B to return to main loader
       if(mp.buttons.released(BTN_B) || mp.buttons.released(BTN_HOME))
         {
           // Do a little cleanup before we leave
@@ -146,8 +147,8 @@ void loop()
       mp.display.print(msg);
       mp.display.print("\n\n            UTC");
       mp.display.pushSprite(0,0);
-      // See if user pressed B or Home to return to loader
       mp.buttons.update();
+      // Press HOME or B to return to main loader
       if(mp.buttons.released(BTN_B) || mp.buttons.released(BTN_HOME))
         {
           // Do a little cleanup before we leave
