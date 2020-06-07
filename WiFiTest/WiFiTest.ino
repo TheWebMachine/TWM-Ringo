@@ -586,7 +586,7 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
     mp.display.setTextFont(2);
     mp.display.setCursor(2,112);
     mp.display.drawFastHLine(0, 111, mp.display.width(), TFT_WHITE);
-    mp.display.printCenter("Exit              Select");
+    mp.display.printCenter("Rescan            Select");
     if(mp.released(BTN_FUN_RIGHT))
     {
       while(!mp.update());
@@ -631,7 +631,7 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
       }
 
     }
-    if (mp.buttons.released(BTN_B) || mp.buttons.released(BTN_FUN_LEFT) || mp.buttons.released(BTN_HOME)) //BUTTON BACK
+    if (mp.buttons.released(BTN_B) || mp.buttons.released(BTN_HOME)) //BUTTON BACK
     {
       // We actually want to go home instead of just leaving the popup
       //while(!mp.update());
@@ -645,6 +645,21 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
       //Go Home
       mp.loader();
       break;
+    }
+    if (mp.buttons.released(BTN_FUN_LEFT))
+    {
+      mp.display.setTextColor(TFT_BLACK);
+      mp.display.setTextSize(1);
+      mp.display.setTextFont(2);
+      mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+      mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+      mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+      mp.display.setCursor(47, 54);
+      mp.display.printCenter("Searching for networks");
+      Serial.println("Searching for networks");
+      while(!mp.update());
+      wifiConnect();
+      return -1;
     }
     mp.update();
   }
