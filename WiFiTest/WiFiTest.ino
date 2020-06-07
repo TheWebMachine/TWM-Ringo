@@ -25,8 +25,9 @@ MAKERphone mp;
 
 void setup()
 {
+  Serial.begin(115200);
   mp.begin(1);
-  mp.inCall=1;
+  mp.inCall=1;  // We need to disable the sleep timer. If allowed to engage sleep, device will reboot upon "wake". Screen doesn't actually turn off, tho.
   mp.display.setTextColor(TFT_BLACK);
   mp.display.setTextSize(1);
   mp.display.setTextFont(2);
@@ -76,7 +77,7 @@ void loop()
   {
     statusline("NTP Waiting For Response", true);
     delay(20);
-    // See if user pressed B or Home to return to loader
+    // Press B or Home to return to loader
       mp.buttons.update();
       if(mp.buttons.released(BTN_B) || mp.buttons.released(BTN_HOME))
         {
@@ -91,6 +92,21 @@ void loop()
           //Go Home
           mp.loader();
           break;
+        }
+      // Press A to select new WiFi Network
+      if(mp.buttons.released(BTN_A)) 
+        {
+          mp.display.setTextColor(TFT_BLACK);
+          mp.display.setTextSize(1);
+          mp.display.setTextFont(2);
+          mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+          mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+          mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+          mp.display.setCursor(47, 54);
+          mp.display.printCenter("Searching for networks");
+          while(!mp.update());
+          wifiConnect();
+          loop();
         }
   }
   statusline("NTP Waiting For Response", false);
@@ -137,6 +153,21 @@ void loop()
           //Go Home
           mp.loader();
           break;
+        }
+      // Press A to select new WiFi Network
+      if(mp.buttons.released(BTN_A)) 
+        {
+          mp.display.setTextColor(TFT_BLACK);
+          mp.display.setTextSize(1);
+          mp.display.setTextFont(2);
+          mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+          mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+          mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+          mp.display.setCursor(47, 54);
+          mp.display.printCenter("Searching for networks");
+          while(!mp.update());
+          wifiConnect();
+          loop();
         }
         
     }
