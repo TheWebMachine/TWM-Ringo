@@ -346,7 +346,7 @@ void wifiConnect()
           mp.display.setTextFont(2);
           mp.display.print(content);
           mp.display.setTextWrap(0);
-          Serial.println(mp.display.cursor_x);
+          //Serial.println(mp.display.cursor_x);
           if (mp.display.cursor_x + 8 >= mp.display.width())
           {
             mp.display.fillRect(1, 55, mp.display.width(), 20, TFT_DARKGREY);
@@ -369,7 +369,7 @@ void wifiConnect()
             }*/
           if((mp.buttons.released(BTN_A)) && content.length() > 0)
           {
-            Serial.println("PRESSED");
+            Serial.println("Password set");
             mp.display.setCursor(20, 50);
             mp.display.fillRect(0, 28, 160, 100, TFT_BLACK);
             mp.display.setCursor(0,40);
