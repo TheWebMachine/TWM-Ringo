@@ -100,6 +100,7 @@ void loop()
       // Press A to select new WiFi Network
       if(mp.buttons.released(BTN_A)) 
         {
+          udp.stop();
           mp.display.setTextColor(TFT_BLACK);
           mp.display.setTextSize(1);
           mp.display.setTextFont(2);
@@ -166,6 +167,7 @@ void loop()
       // Press A to select new WiFi Network
       if(mp.buttons.released(BTN_A)) 
         {
+          udp.stop();
           mp.display.setTextColor(TFT_BLACK);
           mp.display.setTextSize(1);
           mp.display.setTextFont(2);
@@ -584,7 +586,7 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
     mp.display.setTextFont(2);
     mp.display.setCursor(2,112);
     mp.display.drawFastHLine(0, 111, mp.display.width(), TFT_WHITE);
-    mp.display.printCenter("Cancel            Select");
+    mp.display.printCenter("Exit              Select");
     if(mp.released(BTN_FUN_RIGHT))
     {
       while(!mp.update());
@@ -629,10 +631,20 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
       }
 
     }
-    if (mp.buttons.released(BTN_B) || mp.buttons.released(BTN_FUN_LEFT)) //BUTTON BACK
+    if (mp.buttons.released(BTN_B) || mp.buttons.released(BTN_FUN_LEFT) || mp.buttons.released(BTN_HOME)) //BUTTON BACK
     {
+      // We actually want to go home instead of just leaving the popup
+      //while(!mp.update());
+      //return -1;
+      // Do a little cleanup before we leave
+      WiFi.scanDelete();
+      WiFi.disconnect(true); delay(10); // disable WIFI altogether
+      WiFi.mode(WIFI_MODE_NULL); delay(10);
       while(!mp.update());
-      return -1;
+      mp.inCall=0;
+      //Go Home
+      mp.loader();
+      break;
     }
     mp.update();
   }
