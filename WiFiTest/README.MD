@@ -15,6 +15,7 @@ Here's what we have so far:
 Planned changes:
 
 @ Addition of a main menu so we can begin adding other network tests
+
 @ Addition of a settings screen to show after wifiConnect so you can specify DHCP or manual IP/DNS setup, NTP server, and other future
   options
   
