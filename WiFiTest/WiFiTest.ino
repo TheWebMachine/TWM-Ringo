@@ -36,6 +36,7 @@ void setup()
   mp.display.fillRect(5, 50, 150, 26, 0xFD29);
   mp.display.setCursor(47, 54);
   mp.display.printCenter("Searching for networks");
+  Serial.println("Searching for networks");
   while(!mp.update());
   wifiConnect();
   /*-------------------------------------------------------------------*/
@@ -60,6 +61,7 @@ void loop()
   WiFiUDP udp;
   udp.begin(localPort);
   statusline("Trying To Resolve Server", true);
+  Serial.println("Trying To Resolve Server");
 
   /*-------------------------------------------------------------*/
   /* Enable only one of the following two lines.                 */
@@ -76,6 +78,7 @@ void loop()
   while(udp.parsePacket() < sizeof(inPacket) && --count)
   {
     statusline("NTP Waiting For Response", true);
+    Serial.println("NTP Waiting For Response");
     delay(20);
     // Press B or Home to return to loader
       mp.buttons.update();
@@ -104,6 +107,7 @@ void loop()
           mp.display.fillRect(5, 50, 150, 26, 0xFD29);
           mp.display.setCursor(47, 54);
           mp.display.printCenter("Searching for networks");
+          Serial.println("Searching for networks");
           while(!mp.update());
           wifiConnect();
           loop();
@@ -117,7 +121,11 @@ void loop()
     udp.read(inPacket, sizeof(inPacket));
     unsigned long secsSince1900 = (inPacket[40]<<24) | (inPacket[41]<<16) | (inPacket[42]<<8) | inPacket[43];
     long secsSinceEpoch = secsSince1900 - 2208988800UL;
-
+      long sse = secsSinceEpoch+(millis()-ms)/1000;
+      char *msg = ctime(&sse);
+      msg[24]='\0';
+      Serial.printf("Received: %s UTC\n",msg);
+      
     // Extrapolate displayed time over 10 seconds
     while(millis()-ms < 10000)
     {
@@ -125,8 +133,8 @@ void loop()
       long sse = secsSinceEpoch+(millis()-ms)/1000;
       char *msg = ctime(&sse);
       msg[24]='\0';
-      Serial.printf("%s UTC\n",msg);
 
+      
       // Display the extrapolated time - if top line is yellow, time is from NTP - if green, time is exratpolated
       if(sse == secsSinceEpoch) mp.display.setTextColor(TFT_YELLOW);
       else                      mp.display.setTextColor(TFT_GREEN);
@@ -165,6 +173,7 @@ void loop()
           mp.display.fillRect(5, 50, 150, 26, 0xFD29);
           mp.display.setCursor(47, 54);
           mp.display.printCenter("Searching for networks");
+          Serial.println("Searching for networks");
           while(!mp.update());
           wifiConnect();
           loop();
@@ -176,6 +185,7 @@ void loop()
   {
     // NTP request not honored (either outgoing packet or incoming packet lost)
     statusline("NTP No Response - Retry", true);
+    Serial.println("NTP No Response - Retry");
     delay(1000);
     statusline("NTP No Response - Retry", false);
   }
