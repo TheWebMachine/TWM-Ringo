@@ -1,22 +1,4 @@
 
-// Programming example: connecting to a WiFi network and periodically exchanging UDP datagrams with the
-// NTP server at time.nist.gov (port 123). UDP is an unreliable protocol in that no UDP datagram is guaranteed
-// to reach its destination, so not every request for current time will be honored. Furthermore time.nist.gov
-// does not allow requests less than 4 seconds apart. So this program requests the time approximately every
-// 10 seconds and extrapolates the time after each 10-second request by using the jiffy clock function millis().
-
-// This program is intended to allow debugging WiFi connection problems including DNS failures. See the highlited
-// code below where the user may customize this program to use either the DHCP-supplied DNS server or a known
-// good DNS server, and to attempt to connect to a NIST NTP server either by name or by IP address. If the
-// connection by name fails to resolve the name, then the DNS server in use is failing.
-
-// If the WiFi connection to the specified SSID with the specified password succeeds, and the NTP server name
-// resolves, the program will display the date/time returned by the server. If datagrams get lost, there may be
-// momentary pauses in updating the date/time while the UDP request is retried; occasional datagram loss is
-// expected as such is the nature of UDP.
-
-// See highlighted comments below to customize IP/DNS settings.
-
 // Example originally coded 5/10/2020 by Frank Prindle.
 // Additional code added by TheWebMachine 6/6/2020 onward (most of which sourced from https://github.com/CircuitMess/)
 
@@ -29,17 +11,6 @@ void setup()
   mp.begin(1);
   mp.inCall=1;  // We need to disable the sleep timer. If allowed to engage sleep, device will reboot upon "wake". Screen doesn't actually turn off, tho.
   mp.homePopupEnable(0);   // Disable homePopup()
-  mp.display.setTextColor(TFT_BLACK);
-  mp.display.setTextSize(1);
-  mp.display.setTextFont(2);
-  mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
-  mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
-  mp.display.fillRect(5, 50, 150, 26, 0xFD29);
-  mp.display.setCursor(47, 54);
-  mp.display.printCenter("Searching for networks");
-  Serial.println("Searching for networks");
-  while(!mp.update());
-  wifiConnect();
   /*-------------------------------------------------------------------*/
   /* Disable the following line to use DHCP supplied DNS server.       */
   /* Enable the following line to use a well-known DNS server.         */
@@ -54,6 +25,33 @@ void setup()
 
 void loop()
 {
+  while(1)
+   {
+     settingsApp();
+   }
+}
+
+void ntpTest()
+{
+ while(1)
+ {
+  if(WiFi.status() != WL_CONNECTED)
+   {
+      mp.display.setTextColor(TFT_BLACK);
+      mp.display.setTextSize(1);
+      mp.display.setTextFont(2);
+      mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+      mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+      mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+      mp.display.setCursor(47, 54);
+      mp.display.printCenter("Select Network first!");
+      Serial.println("Select Network first!");
+      while(!mp.update());
+      delay(2000);
+      break;
+   }
+  mp.display.setTextSize(1);
+  mp.display.setTextFont(1);
   unsigned int localPort = 8888; // Fairly arbitrary
   unsigned char inPacket[48];
   // NTP time request packet
@@ -81,39 +79,22 @@ void loop()
     statusline("NTP Waiting For Response", true);
     Serial.println("NTP Waiting For Response");
     delay(20);
+  
       mp.buttons.update();
-      // Press HOME or B to return to main loader
-      if(mp.buttons.released(BTN_B) || mp.buttons.released(BTN_HOME))
-        {
-          // Do a little cleanup before we leave
-          udp.stop();
-          WiFi.scanDelete();
-          WiFi.disconnect(true); delay(10); // disable WIFI altogether
-          WiFi.mode(WIFI_MODE_NULL); delay(10);
-          while(!mp.update());
-          mp.inCall=0;
-          
-          //Go Home
-          mp.loader();
-          break;
-        }
       // Press A to select new WiFi Network
       if(mp.buttons.released(BTN_A)) 
         {
           udp.stop();
-          mp.display.setTextColor(TFT_BLACK);
-          mp.display.setTextSize(1);
-          mp.display.setTextFont(2);
-          mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
-          mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
-          mp.display.fillRect(5, 50, 150, 26, 0xFD29);
-          mp.display.setCursor(47, 54);
-          mp.display.printCenter("Searching for networks");
-          Serial.println("Searching for networks");
-          while(!mp.update());
           wifiConnect();
-          loop();
+          return;
         }
+      // Press B or HOME to return to Menu
+      if(mp.buttons.released(BTN_B) || mp.buttons.released(BTN_HOME))
+        {
+          udp.stop();
+          return;
+        }
+
   }
   statusline("NTP Waiting For Response", false);
   if(count)
@@ -148,40 +129,22 @@ void loop()
       mp.display.print(msg);
       mp.display.print("\n\n            UTC");
       mp.display.pushSprite(0,0);
+      
       mp.buttons.update();
-      // Press HOME or B to return to main loader
-      if(mp.buttons.released(BTN_B) || mp.buttons.released(BTN_HOME))
-        {
-          // Do a little cleanup before we leave
-          udp.stop();
-          WiFi.scanDelete();
-          WiFi.disconnect(true); delay(10); // disable WIFI altogether
-          WiFi.mode(WIFI_MODE_NULL); delay(10);
-          while(!mp.update());
-          mp.inCall=0;
-          
-          //Go Home
-          mp.loader();
-          break;
-        }
       // Press A to select new WiFi Network
       if(mp.buttons.released(BTN_A)) 
         {
           udp.stop();
-          mp.display.setTextColor(TFT_BLACK);
-          mp.display.setTextSize(1);
-          mp.display.setTextFont(2);
-          mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
-          mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
-          mp.display.fillRect(5, 50, 150, 26, 0xFD29);
-          mp.display.setCursor(47, 54);
-          mp.display.printCenter("Searching for networks");
-          Serial.println("Searching for networks");
-          while(!mp.update());
           wifiConnect();
-          loop();
+          return;
         }
-        
+      // Press B or HOME to return to Menu
+      if(mp.buttons.released(BTN_B) || mp.buttons.released(BTN_HOME))
+        {
+          udp.stop();
+          return;
+        }
+
     }
   }
   else
@@ -195,7 +158,8 @@ void loop()
   // Shut down UDP in preparation for next loop
   udp.stop();
   
-
+  
+ } // repeatedly loop ntpTest()
 }
 
 // Display (on==true) or erase (on==false) transient status line near bottom of display
@@ -208,32 +172,21 @@ void statusline(char *msg, bool on)
 
 }
 
+
+
 // Borrowed this from git:CircuitMess/CircuitMess-Ringo-firmware/blob/master/src/settingsApp.cpp
 void wifiConnect()
 {
-  // if(!mp.wifi)
-  // {
-  //  mp.display.setTextColor(TFT_BLACK);
-  //  mp.display.setTextSize(1);
-  //  mp.display.setTextFont(2);
-  //  mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
-  //  mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
-  //  mp.display.fillRect(5, 50, 150, 26, 0xFD29);
-  //  mp.display.setCursor(47, 54);
-  //  mp.display.printCenter("WiFi turned off!");
-  //  uint32_t tempMillis = millis();
-  //  while(millis() < tempMillis + 2000)
-  //  {
-  //    mp.update();
-  //    if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
-  //    {
-  //      while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-  //        mp.update();
-  //      break;
-  //    }
-  //  }
-  //  mp.update();
-  // }
+  mp.display.setTextColor(TFT_BLACK);
+  mp.display.setTextSize(1);
+  mp.display.setTextFont(2);
+  mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+  mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+  mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+  mp.display.setCursor(47, 54);
+  mp.display.printCenter("Searching for networks");
+  Serial.println("Searching for networks");
+  while(!mp.update());
   bool blinkState = 1;
   unsigned long elapsedMillis = millis();
   bool helpPop;
@@ -417,26 +370,6 @@ void wifiConnect()
             }
             Serial.print("Wifi status: ");
             Serial.println(WiFi.status());
-            // if(WiFi.status() == WL_DISCONNECTED)
-            // {
-              
-            //  mp.display.fillRect(0, 40, mp.display.width(), 60, TFT_BLACK);
-            //  mp.display.setCursor(0, 45);
-            //  mp.display.printCenter("Wrong password :(");
-            //  uint32_t tempMillis = millis();
-            //  while(millis() < tempMillis + 2000)
-            //  {
-            //    mp.update();
-            //    if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
-            //    {
-            //      while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
-            //        mp.update();
-            //      break;
-            //    }
-            //  }
-            //  while(!mp.update());
-            //  break;
-            // }
             if(WiFi.status() == WL_CONNECTED)
             {
               mp.update();
@@ -459,7 +392,7 @@ void wifiConnect()
           if(mp.buttons.released(BTN_B))
           {
             while(!mp.update());
-            break;
+            return;
           }
           mp.update();
         }
@@ -633,18 +566,8 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
     }
     if (mp.buttons.released(BTN_B) || mp.buttons.released(BTN_HOME)) //BUTTON BACK
     {
-      // We actually want to go home instead of just leaving the popup
-      //while(!mp.update());
-      //return -1;
-      // Do a little cleanup before we leave
-      WiFi.scanDelete();
-      WiFi.disconnect(true); delay(10); // disable WIFI altogether
-      WiFi.mode(WIFI_MODE_NULL); delay(10);
       while(!mp.update());
-      mp.inCall=0;
-      //Go Home
-      mp.loader();
-      break;
+      return -1;
     }
     if (mp.buttons.released(BTN_FUN_LEFT))
     {
@@ -705,4 +628,199 @@ void wifiDrawCursor(uint8_t i, int32_t y) {
   y += i * (boxHeight + 2) + offset;
   mp.display.drawRect(1, y, mp.display.width() - 2, boxHeight + 1, TFT_RED);
   mp.display.drawRect(0, y-1, mp.display.width(), boxHeight + 3, TFT_RED);
+}
+
+
+
+ // Borrowed from settingsApp
+boolean colorSetup = 0;
+String settingsItems[3] PROGMEM = {
+    "Choose Network",
+    "DHCP Settings",
+    "NTP Test"
+};
+
+void settingsMenuDrawBox(String title, uint8_t i, int32_t y) {
+  uint8_t scale = 2;
+  uint8_t boxHeight = 20;
+  y += i * boxHeight + settingsMenuYOffset;
+  if (y < 0 || y > mp.display.width()) {
+    return;
+  }
+
+
+  if (title == "Choose Network") //red
+  {
+    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight-2, 0xFB6D);
+    //mp.display.drawBitmap(6, y + 2*scale, network, 0x7800);
+  }
+  if (title == "DHCP Settings") //green
+  {
+    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight-2, 0x8FEA);
+    //mp.display.drawBitmap(6, y + 2*scale, displayIcon, 0x0341);
+  }
+  if (title == "NTP Test") //yellow
+  {
+    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight-2, 0xFFED);
+    //mp.display.drawBitmap(6, y + 2*scale, timeIcon, 0x6B60);
+  }
+  if (title == "Sound")//blue
+  {
+    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight-2, 0xA7FF);
+    //mp.display.drawBitmap(6, y + 2*scale, soundIcon, 0x010F);
+  }
+  if (title == "Security")//purple
+  {
+    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight-2, 0xED1F);
+    //mp.display.drawBitmap(6, y + 2*scale, security, 0x600F);
+  }
+  if (title == "About & update")//orange
+  {
+    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight-2, 0xFD29);
+    //mp.display.drawBitmap(6, y + 2*scale, about, 0x8200);
+  }
+  mp.display.setTextColor(TFT_BLACK);
+  mp.display.setTextSize(1);
+  mp.display.setTextFont(2);
+  mp.display.drawString(title, 30, y + 2 );
+  mp.display.setTextColor(TFT_WHITE);
+  mp.display.setFreeFont(TT1);
+}
+void settingsMenuDrawCursor(uint8_t i, int32_t y, bool pressed) {
+  uint8_t boxHeight = 20;
+  y += i * boxHeight + settingsMenuYOffset;
+  mp.display.drawRect(0, y-1, mp.display.width()-1, boxHeight+2, TFT_RED);
+  mp.display.drawRect(1, y, mp.display.width()-3, boxHeight, TFT_RED);
+}
+int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
+  bool pressed = 0;
+  uint8_t cursor = _cursor;
+  int32_t cameraY = 0;
+  int32_t cameraY_actual = 0;
+  uint8_t boxHeight = 20;
+  bool blinkState = 0;
+  uint32_t blinkMillis = millis();
+  while (1) {
+    mp.update();
+    mp.display.fillScreen(TFT_BLACK);
+    mp.display.setCursor(0, 0);
+    cameraY_actual = (cameraY_actual + cameraY) / 2;
+    if (cameraY_actual - cameraY == 1) {
+      cameraY_actual = cameraY;
+    }
+    if(millis() - blinkMillis > 350)
+    {
+      blinkMillis = millis();
+      blinkState = !blinkState;
+    }
+    for (uint8_t i = 0; i < length; i++) {
+      settingsMenuDrawBox(title[i], i, cameraY_actual);
+    }
+    if(blinkState)
+      settingsMenuDrawCursor(cursor, cameraY_actual, pressed);
+
+    if (mp.buttons.timeHeld(BTN_DOWN) == 0 && mp.buttons.timeHeld(BTN_UP) == 0)
+      pressed = 0;
+
+    if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
+      mp.osc->note(75, 0.05);
+      mp.osc->play();
+
+      while(!mp.update());// Exit when pressed
+      break;
+    }
+    if(mp.buttons.released(BTN_HOME)) {
+      WiFi.scanDelete();
+      WiFi.disconnect(true); delay(10); // disable WIFI altogether
+      WiFi.mode(WIFI_MODE_NULL); delay(10);
+      while(!mp.update());
+      mp.inCall=0;
+      mp.loader();
+    }
+
+
+    if (mp.buttons.pressed(BTN_UP)) {  //BUTTON UP
+      blinkState = 1;
+      blinkMillis = millis();
+      mp.osc->note(75, 0.05);
+      mp.osc->play();
+      if (cursor == 0) {
+        cursor = length - 1;
+        if (length > 6) {
+          cameraY = -(cursor - 2) * boxHeight;
+        }
+      }
+      else {
+        cursor--;
+        if (cursor > 0 && (cursor * boxHeight + cameraY + settingsMenuYOffset) < boxHeight) {
+          cameraY += 15;
+        }
+      }
+      pressed = 1;
+    }
+
+    if (mp.buttons.pressed(BTN_DOWN)) { //BUTTON DOWN
+      blinkState = 1;
+      blinkMillis = millis();
+      mp.osc->note(75, 0.05);
+      mp.osc->play();
+      cursor++;
+      if ((cursor * boxHeight + cameraY + settingsMenuYOffset) > 128) {
+        cameraY -= boxHeight;
+      }
+      if (cursor >= length) {
+        cursor = 0;
+        cameraY = 0;
+
+      }
+      pressed = 1;
+    }
+
+
+    if (mp.buttons.released(BTN_B)) //BUTTON BACK
+    {
+      while(!mp.update());
+      return -1;
+    }
+  }
+
+  return cursor;
+
+}
+bool settingsApp() {
+  int8_t input = 0;
+  while(!mp.update());
+  while (1)
+  {
+    input = settingsMenu(settingsItems, 3, input);
+    if (input == -1) //BUTTON BACK
+      break;
+    if (input == 0)
+      wifiConnect();
+    if (input == 1){
+      mp.display.setTextColor(TFT_BLACK);
+      mp.display.setTextSize(1);
+      mp.display.setTextFont(2);
+      mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+      mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+      mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+      mp.display.setCursor(47, 54);
+      mp.display.printCenter("Not yet implemented!");
+      Serial.println("Not yet implemented!");
+      while(!mp.update());
+      delay(2000);
+    }
+    if (input == 2)
+      ntpTest();
+    //if (input == 3)
+      //soundMenu();
+    //if (input == 4)
+      //securityMenu();
+    //if (input == 5)
+      //if(updateMenu())
+        //return true;
+  }
+
+  return -1;
+
 }
