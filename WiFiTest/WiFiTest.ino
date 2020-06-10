@@ -4,6 +4,7 @@
 
 #include "MAKERphone.h"
 MAKERphone mp;
+String connectedToSSID;
 
 void setup()
 {
@@ -51,8 +52,13 @@ void ntpTest()
       delay(2000);
       break;
    }
+  mp.display.fillScreen(TFT_BLACK);
   mp.display.setTextSize(1);
   mp.display.setTextFont(1);
+  mp.display.setTextColor(TFT_GREEN);
+  mp.display.setCursor(0,115);
+  mp.display.print("Connected:");
+  mp.display.print(connectedToSSID);
   unsigned int localPort = 8888; // Fairly arbitrary
   unsigned char inPacket[48];
   // NTP time request packet
@@ -129,6 +135,10 @@ void ntpTest()
       mp.display.setCursor(8,50);
       mp.display.print(msg);
       mp.display.print("\n\n            UTC");
+      mp.display.setTextColor(TFT_GREEN);
+      mp.display.setCursor(0,115);
+      mp.display.print("Connected:");
+      mp.display.print(connectedToSSID);
       mp.display.pushSprite(0,0);
       
       mp.buttons.update();
@@ -340,6 +350,7 @@ void wifiConnect()
             content.toCharArray(temp2, content.length()+1);
             Serial.print("Connecting to ");
             Serial.println(temp);
+            connectedToSSID = temp;
             WiFi.begin(temp, temp2);
             uint8_t counter = 0;
             while (WiFi.status() != WL_CONNECTED)
@@ -649,7 +660,6 @@ void settingsMenuDrawBox(String title, uint8_t i, int32_t y) {
     return;
   }
 
-
   if (title == "Choose Network") //red
   {
     mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight-2, 0xFB6D);
@@ -680,6 +690,21 @@ void settingsMenuDrawBox(String title, uint8_t i, int32_t y) {
     mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight-2, 0xFD29);
     //mp.display.drawBitmap(6, y + 2*scale, about, 0x8200);
   }
+  if(WiFi.status() == WL_CONNECTED)
+   {
+    mp.display.setTextFont(1);
+    mp.display.setTextColor(TFT_GREEN);
+    mp.display.setCursor(0,115);
+    mp.display.print("Connected:");
+    mp.display.print(connectedToSSID);
+   }
+  else
+   {
+    mp.display.setTextFont(1);
+    mp.display.setTextColor(TFT_YELLOW);
+    mp.display.setCursor(0,115);
+    mp.display.print("NOT CONNECTED!");
+   }
   mp.display.setTextColor(TFT_BLACK);
   mp.display.setTextSize(1);
   mp.display.setTextFont(2);
