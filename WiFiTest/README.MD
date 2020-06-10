@@ -1,7 +1,7 @@
 First off, huge thanks to the CircuitMess team and shoutout to Frank Prindle (https://community.circuitmess.com/u/frankprindle) for the
 first draft of this code. It is definitely a WIP, but the hope is to expand it into a full WiFi utility for Ringo.
 
-**v2 - Now with more menu-y goodness!**
+**v0.2 - Now with more menu-y goodness!**
 
 When the app starts, you're shown the **Main Menu**:
  * **Choose Network** - _Always start here_. You'll need to connect to your Wifi network before you do anything else.
