@@ -35,6 +35,7 @@ void ntpTest()
 {
  while(1)
  {
+  mp.update();
   if(WiFi.status() != WL_CONNECTED)
    {
       mp.display.setTextColor(TFT_BLACK);
@@ -86,7 +87,7 @@ void ntpTest()
         {
           udp.stop();
           wifiConnect();
-          return;
+          ntpTest();
         }
       // Press B or HOME to return to Menu
       if(mp.buttons.released(BTN_B) || mp.buttons.released(BTN_HOME))
@@ -136,7 +137,7 @@ void ntpTest()
         {
           udp.stop();
           wifiConnect();
-          return;
+          ntpTest();
         }
       // Press B or HOME to return to Menu
       if(mp.buttons.released(BTN_B) || mp.buttons.released(BTN_HOME))
