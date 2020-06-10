@@ -37,7 +37,7 @@ void ntpTest()
  mp.display.fillScreen(TFT_BLACK);
  while(1)
  {
-  mp.update();
+  while(!mp.update());
   if(WiFi.status() != WL_CONNECTED)
    {
       mp.display.setTextColor(TFT_BLACK);
@@ -47,11 +47,11 @@ void ntpTest()
       mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
       mp.display.fillRect(5, 50, 150, 26, 0xFD29);
       mp.display.setCursor(47, 54);
-      mp.display.printCenter("Select Network first!");
-      Serial.println("Select Network first!");
+      mp.display.printCenter("Not connected! :(");
+      Serial.println("Not connected! :(");
       while(!mp.update());
       delay(2000);
-      break;
+      return;
    }
   mp.display.setTextSize(1);
   mp.display.setTextFont(1);
@@ -94,6 +94,7 @@ void ntpTest()
           udp.stop();
           wifiConnect();
           ntpTest();
+          return;
         }
       // Press B or HOME to return to Menu
       if(mp.buttons.released(BTN_B) || mp.buttons.released(BTN_HOME))
@@ -148,6 +149,7 @@ void ntpTest()
           udp.stop();
           wifiConnect();
           ntpTest();
+          return;
         }
       // Press B or HOME to return to Menu
       if(mp.buttons.released(BTN_B) || mp.buttons.released(BTN_HOME))
@@ -171,6 +173,7 @@ void ntpTest()
   
   
  } // repeatedly loop ntpTest()
+ 
 }
 
 // Display (on==true) or erase (on==false) transient status line near bottom of display
