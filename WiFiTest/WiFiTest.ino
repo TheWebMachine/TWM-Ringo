@@ -34,6 +34,7 @@ void loop()
 
 void ntpTest()
 {
+ mp.display.fillScreen(TFT_BLACK);
  while(1)
  {
   mp.update();
@@ -52,7 +53,6 @@ void ntpTest()
       delay(2000);
       break;
    }
-  mp.display.fillScreen(TFT_BLACK);
   mp.display.setTextSize(1);
   mp.display.setTextFont(1);
   mp.display.setTextColor(TFT_GREEN);
