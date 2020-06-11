@@ -1,9 +1,24 @@
-
+// ***** Version 0.2.1 *****
 // Example originally coded 5/10/2020 by Frank Prindle.
 // Additional code added by TheWebMachine 6/6/2020 onward (most of which sourced from https://github.com/CircuitMess/)
 
-#include "MAKERphone.h"
+const byte network[] PROGMEM = {16,12,B00011111,B10000000,B00100000,B01000000,B01000000,B00100000,B10000000,B00010000,B00011111,B10000000,B00100000,B01000000,B01000000,B00100000,B00001111,B00000000,B00010000,B10000000,B00000000,B00000000,B00000110,B00000000,B00001111,B00000000,};
+const byte composeIcon[] PROGMEM = { 16,9,
+  B01111111,B10000000,
+  B10000000,B01000000,
+  B10111111,B01000000,
+  B10000000,B01000000,
+  B10111110,B01000000,
+  B10000000,B01000000,
+  B01001111,B10000000,
+  B01010000,B00000000,
+  B01100000,B00000000,
+};
+const byte timeIcon[] PROGMEM = {16,12,B00011111,B10000000,B00100000,B01000000,B01000100,B00100000,B10000100,B00010000,B10000100,B00010000,B10000100,B00010000,B10000111,B10010000,B10000000,B00010000,B10000000,B00010000,B01000000,B00100000,B00100000,B01000000,B00011111,B10000000,};
+
+#include <MAKERphone.h>
 MAKERphone mp;
+
 String connectedToSSID;
 
 void setup()
@@ -666,17 +681,17 @@ void settingsMenuDrawBox(String title, uint8_t i, int32_t y) {
   if (title == "Choose Network") //red
   {
     mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight-2, 0xFB6D);
-    //mp.display.drawBitmap(6, y + 2*scale, network, 0x7800);
+    mp.display.drawBitmap(6, y + 2*scale, network, 0x7800);
   }
   if (title == "DHCP Settings") //green
   {
     mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight-2, 0x8FEA);
-    //mp.display.drawBitmap(6, y + 2*scale, displayIcon, 0x0341);
+    mp.display.drawBitmap(6, y + 2*scale, composeIcon, 0x0341);
   }
   if (title == "NTP Test") //yellow
   {
     mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight-2, 0xFFED);
-    //mp.display.drawBitmap(6, y + 2*scale, timeIcon, 0x6B60);
+    mp.display.drawBitmap(6, y + 2*scale, timeIcon, 0x6B60);
   }
   if (title == "Sound")//blue
   {
