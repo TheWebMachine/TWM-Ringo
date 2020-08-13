@@ -1,4 +1,4 @@
-// ***** Version 0.2.1 *****
+// ***** Version 0.2.2 *****
 // Example originally coded 5/10/2020 by Frank Prindle.
 // Additional code added by TheWebMachine 6/6/2020 onward (most of which sourced from https://github.com/CircuitMess/)
 
@@ -20,6 +20,7 @@ const byte timeIcon[] PROGMEM = {16,12,B00011111,B10000000,B00100000,B01000000,B
 MAKERphone mp;
 
 String connectedToSSID;
+String currentRSSI;
 
 void setup()
 {
@@ -74,6 +75,24 @@ void ntpTest()
   mp.display.setCursor(0,115);
   mp.display.print("Connected:");
   mp.display.print(connectedToSSID);
+    mp.display.fillRect(139, 109, 19, 18, TFT_LIGHTGREY);
+    int strength = currentRSSI.toInt();
+    //> -50 full
+    // < -40 && > -60 high
+    // < -60 && > -85 low
+    // < -95 nosignal
+    if(strength > -50)
+      mp.display.drawBitmap(140, 110, signalFullIcon, TFT_GREEN, 2);
+    else if(strength <= -50 && strength > -70)
+      mp.display.drawBitmap(140, 110, signalHighIcon, TFT_GREEN, 2);
+    else if(strength <= -70 && strength > -95)
+      mp.display.drawBitmap(140, 110, signalLowIcon, TFT_YELLOW, 2);
+    else if(strength <= -95)
+      mp.display.drawBitmap(140, 110, noSignalIcon, TFT_RED, 2);
+    mp.display.setTextColor(TFT_BLACK);
+    mp.display.setCursor(140,118);
+    mp.display.print(currentRSSI);
+    
   unsigned int localPort = 8888; // Fairly arbitrary
   unsigned char inPacket[48];
   // NTP time request packet
@@ -139,7 +158,7 @@ void ntpTest()
       long sse = secsSinceEpoch+(millis()-ms)/1000;
       char *msg = ctime(&sse);
       msg[24]='\0';
-
+      currentRSSI = WiFi.RSSI();
       
       // Display the extrapolated time - if top line is yellow, time is from NTP - if green, time is exratpolated
       if(sse == secsSinceEpoch) mp.display.setTextColor(TFT_YELLOW);
@@ -155,6 +174,23 @@ void ntpTest()
       mp.display.setCursor(0,115);
       mp.display.print("Connected:");
       mp.display.print(connectedToSSID);
+    mp.display.fillRect(139, 109, 19, 18, TFT_LIGHTGREY);
+    int strength = currentRSSI.toInt();
+    //> -50 full
+    // < -40 && > -60 high
+    // < -60 && > -85 low
+    // < -95 nosignal
+    if(strength > -50)
+      mp.display.drawBitmap(140, 110, signalFullIcon, TFT_GREEN, 2);
+    else if(strength <= -50 && strength > -70)
+      mp.display.drawBitmap(140, 110, signalHighIcon, TFT_GREEN, 2);
+    else if(strength <= -70 && strength > -95)
+      mp.display.drawBitmap(140, 110, signalLowIcon, TFT_YELLOW, 2);
+    else if(strength <= -95)
+      mp.display.drawBitmap(140, 110, noSignalIcon, TFT_RED, 2);
+    mp.display.setTextColor(TFT_BLACK);
+    mp.display.setCursor(140,118);
+    mp.display.print(currentRSSI);
       mp.display.pushSprite(0,0);
       
       mp.buttons.update();
@@ -710,11 +746,30 @@ void settingsMenuDrawBox(String title, uint8_t i, int32_t y) {
   }
   if(WiFi.status() == WL_CONNECTED)
    {
+    currentRSSI = WiFi.RSSI();
     mp.display.setTextFont(1);
     mp.display.setTextColor(TFT_GREEN);
     mp.display.setCursor(0,115);
     mp.display.print("Connected:");
     mp.display.print(connectedToSSID);
+    mp.display.fillRect(139, 109, 19, 18, TFT_LIGHTGREY);
+    int strength = currentRSSI.toInt();
+    //> -50 full
+    // < -40 && > -60 high
+    // < -60 && > -85 low
+    // < -95 nosignal
+    if(strength > -50)
+      mp.display.drawBitmap(140, 110, signalFullIcon, TFT_GREEN, 2);
+    else if(strength <= -50 && strength > -70)
+      mp.display.drawBitmap(140, 110, signalHighIcon, TFT_GREEN, 2);
+    else if(strength <= -70 && strength > -95)
+      mp.display.drawBitmap(140, 110, signalLowIcon, TFT_YELLOW, 2);
+    else if(strength <= -95)
+      mp.display.drawBitmap(140, 110, noSignalIcon, TFT_RED, 2);
+    mp.display.setTextColor(TFT_BLACK);
+    mp.display.setCursor(140,118);
+    mp.display.print(currentRSSI);
+
    }
   else
    {
