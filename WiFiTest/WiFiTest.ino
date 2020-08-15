@@ -3,17 +3,7 @@
 // Additional code added by TheWebMachine 6/6/2020 onward (most of which sourced from https://github.com/CircuitMess/)
 
 const byte network[] PROGMEM = {16,12,B00011111,B10000000,B00100000,B01000000,B01000000,B00100000,B10000000,B00010000,B00011111,B10000000,B00100000,B01000000,B01000000,B00100000,B00001111,B00000000,B00010000,B10000000,B00000000,B00000000,B00000110,B00000000,B00001111,B00000000,};
-const byte composeIcon[] PROGMEM = { 16,9,
-  B01111111,B10000000,
-  B10000000,B01000000,
-  B10111111,B01000000,
-  B10000000,B01000000,
-  B10111110,B01000000,
-  B10000000,B01000000,
-  B01001111,B10000000,
-  B01010000,B00000000,
-  B01100000,B00000000,
-};
+const byte composeIcon[] PROGMEM = {16,9,B01111111,B10000000,B10000000,B01000000,B10111111,B01000000,B10000000,B01000000,B10111110,B01000000,B10000000,B01000000,B01001111,B10000000,B01010000,B00000000,B01100000,B00000000,};
 const byte timeIcon[] PROGMEM = {16,12,B00011111,B10000000,B00100000,B01000000,B01000100,B00100000,B10000100,B00010000,B10000100,B00010000,B10000100,B00010000,B10000111,B10010000,B10000000,B00010000,B10000000,B00010000,B01000000,B00100000,B00100000,B01000000,B00011111,B10000000,};
 
 #include <MAKERphone.h>
@@ -26,8 +16,8 @@ void setup()
 {
   Serial.begin(115200);
   mp.begin(1);
-  mp.inCall=1;  // We need to disable the sleep timer. If allowed to engage sleep, device will reboot upon "wake". Screen doesn't actually turn off, tho.
-  mp.homePopupEnable(0);   // Disable homePopup()
+  mp.inCall=0;
+  mp.homePopupEnable(1);   // Enable homePopup()
   /*-------------------------------------------------------------------*/
   /* Disable the following line to use DHCP supplied DNS server.       */
   /* Enable the following line to use a well-known DNS server.         */
@@ -50,6 +40,8 @@ void loop()
 
 void ntpTest()
 {
+ mp.inCall=1;
+ while(!mp.update());
  mp.display.fillScreen(TFT_BLACK);
  while(1)
  {
@@ -242,6 +234,7 @@ void statusline(char *msg, bool on)
 // Borrowed this from git:CircuitMess/CircuitMess-Ringo-firmware/blob/master/src/settingsApp.cpp
 void wifiConnect()
 {
+  mp.inCall=1;
   mp.display.setTextColor(TFT_BLACK);
   mp.display.setTextSize(1);
   mp.display.setTextFont(2);
@@ -828,14 +821,15 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
       while(!mp.update());// Exit when pressed
       break;
     }
-    if(mp.buttons.released(BTN_HOME)) {
-      WiFi.scanDelete();
-      WiFi.disconnect(true); delay(10); // disable WIFI altogether
-      WiFi.mode(WIFI_MODE_NULL); delay(10);
-      while(!mp.update());
-      mp.inCall=0;
-      mp.loader();
-    }
+    //if(mp.buttons.released(BTN_HOME)) {
+      //WiFi.scanDelete();
+      //WiFi.disconnect(true); delay(10); // disable WIFI altogether
+      //WiFi.mode(WIFI_MODE_NULL); delay(10);
+      //while(!mp.update());
+      //mp.inCall=0;
+      //mp.update();
+      //mp.loader();
+    //}
 
 
     if (mp.buttons.pressed(BTN_UP)) {  //BUTTON UP
@@ -886,11 +880,14 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
   return cursor;
 
 }
+
+
 bool settingsApp() {
   int8_t input = 0;
-  while(!mp.update());
   while (1)
   {
+    mp.inCall=0;
+    while(!mp.update());
     input = settingsMenu(settingsItems, 3, input);
     if (input == -1) //BUTTON BACK
       break;
@@ -918,8 +915,7 @@ bool settingsApp() {
     //if (input == 5)
       //if(updateMenu())
         //return true;
+        
   }
-
   return -1;
-
 }
