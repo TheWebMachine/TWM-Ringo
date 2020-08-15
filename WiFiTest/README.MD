@@ -1,6 +1,8 @@
 First off, huge thanks to the CircuitMess team and shoutout to Frank Prindle (https://community.circuitmess.com/u/frankprindle) for the
 first draft of this code. It is definitely a WIP, but the hope is to expand it into a full WiFi utility for Ringo.
 
+![Screenshot1](WiFiTest_screenshot_1.jpg)
+
 **v0.3 - Now with LIVE signal strength meter and homePopup() support!**
 
 When the app starts, you're shown the **Main Menu**:
