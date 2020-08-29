@@ -1,22 +1,24 @@
-// ***** Version 0.2.2 *****
 // Example originally coded 5/10/2020 by Frank Prindle.
 // Additional code added by TheWebMachine 6/6/2020 onward (most of which sourced from https://github.com/CircuitMess/)
 
-const byte network[] PROGMEM = {16,12,B00011111,B10000000,B00100000,B01000000,B01000000,B00100000,B10000000,B00010000,B00011111,B10000000,B00100000,B01000000,B01000000,B00100000,B00001111,B00000000,B00010000,B10000000,B00000000,B00000000,B00000110,B00000000,B00001111,B00000000,};
-const byte composeIcon[] PROGMEM = {16,9,B01111111,B10000000,B10000000,B01000000,B10111111,B01000000,B10000000,B01000000,B10111110,B01000000,B10000000,B01000000,B01001111,B10000000,B01010000,B00000000,B01100000,B00000000,};
-const byte timeIcon[] PROGMEM = {16,12,B00011111,B10000000,B00100000,B01000000,B01000100,B00100000,B10000100,B00010000,B10000100,B00010000,B10000100,B00010000,B10000111,B10010000,B10000000,B00010000,B10000000,B00010000,B01000000,B00100000,B00100000,B01000000,B00011111,B10000000,};
+const String progVer = "0.4.0";
+const byte network[] PROGMEM = {16, 12, B00011111, B10000000, B00100000, B01000000, B01000000, B00100000, B10000000, B00010000, B00011111, B10000000, B00100000, B01000000, B01000000, B00100000, B00001111, B00000000, B00010000, B10000000, B00000000, B00000000, B00000110, B00000000, B00001111, B00000000,};
+const byte composeIcon[] PROGMEM = {16, 9, B01111111, B10000000, B10000000, B01000000, B10111111, B01000000, B10000000, B01000000, B10111110, B01000000, B10000000, B01000000, B01001111, B10000000, B01010000, B00000000, B01100000, B00000000,};
+const byte timeIcon[] PROGMEM = {16, 12, B00011111, B10000000, B00100000, B01000000, B01000100, B00100000, B10000100, B00010000, B10000100, B00010000, B10000100, B00010000, B10000111, B10010000, B10000000, B00010000, B10000000, B00010000, B01000000, B00100000, B00100000, B01000000, B00011111, B10000000,};
+const byte soundIcon[] PROGMEM = {16, 12, B00000010, B00000000, B00000110, B01000000, B00001110, B00100000, B00011110, B10010000, B11111110, B01010000, B11111110, B01010000, B11111110, B01010000, B11111110, B01010000, B00011110, B10010000, B00001110, B00100000, B00000110, B01000000, B00000010, B00000000,};
 
 #include <MAKERphone.h>
 MAKERphone mp;
 
 String connectedToSSID;
 String currentRSSI;
+IPAddress ip;
 
 void setup()
 {
   Serial.begin(115200);
   mp.begin(1);
-  mp.inCall=0;
+  mp.inCall = 0;
   mp.homePopupEnable(1);   // Enable homePopup()
   /*-------------------------------------------------------------------*/
   /* Disable the following line to use DHCP supplied DNS server.       */
@@ -27,27 +29,275 @@ void setup()
   /*    Leave the fourth IP address alone (Google DNS).                */
   /*-------------------------------------------------------------------*/
   //WiFi.config(IPAddress(192,168,1,177),IPAddress(192,168,1,1),IPAddress(255,255,255,0),IPAddress(8,8,8,8));
-  
+
+}
+
+// Display (on==true) or erase (on==false) transient status line near bottom of display
+void statusline(char *msg, bool on)
+{
+  mp.display.setTextColor(on ? TFT_YELLOW : TFT_BLACK);
+  mp.display.setCursor(0, 100);
+  mp.display.print(msg);
+  mp.display.pushSprite(0, 0);
+
 }
 
 void loop()
 {
-  while(1)
-   {
-     settingsApp();
-   }
+  while (1)
+  {
+    settingsApp();
+  }
 }
 
+// ---------------------
+// ----- MAIN MENU -----
+// ---------------------
+// Borrowed from settingsApp
+boolean colorSetup = 0;
+String settingsItems[4] PROGMEM = {
+  "Choose Network",
+  "DHCP Settings",
+  "NTP Test",
+  "Chat Server"
+};
+
+void settingsMenuDrawBox(String title, uint8_t i, int32_t y) {
+  uint8_t scale = 2;
+  uint8_t boxHeight = 20;
+  y += i * boxHeight + settingsMenuYOffset;
+  if (y < 0 || y > mp.display.width()) {
+    return;
+  }
+
+  if (title == "Choose Network") //red
+  {
+    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 2, 0xFB6D);
+    mp.display.drawBitmap(6, y + 2 * scale, network, 0x7800);
+  }
+  if (title == "DHCP Settings") //green
+  {
+    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 2, 0x8FEA);
+    mp.display.drawBitmap(6, y + 2 * scale, composeIcon, 0x0341);
+  }
+  if (title == "NTP Test") //yellow
+  {
+    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 2, 0xFFED);
+    mp.display.drawBitmap(6, y + 2 * scale, timeIcon, 0x6B60);
+  }
+  if (title == "Chat Server")//blue
+  {
+    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 2, 0xA7FF);
+    mp.display.drawBitmap(6, y + 2 * scale, soundIcon, 0x010F);
+  }
+  if (title == "Security")//purple
+  {
+    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 2, 0xED1F);
+    //mp.display.drawBitmap(6, y + 2*scale, security, 0x600F);
+  }
+  if (title == "About & update")//orange
+  {
+    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 2, 0xFD29);
+    //mp.display.drawBitmap(6, y + 2*scale, about, 0x8200);
+  }
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    currentRSSI = WiFi.RSSI();
+    mp.display.setTextFont(1);
+    mp.display.setTextColor(TFT_GREEN);
+    mp.display.setCursor(0, 115);
+    mp.display.print("Connected:");
+    mp.display.print(connectedToSSID);
+    mp.display.fillRect(139, 109, 19, 18, TFT_LIGHTGREY);
+    int strength = currentRSSI.toInt();
+    //> -50 full
+    // < -50 && > -75 high
+    // < -75 && > -95 low
+    // < -95 nosignal
+    if (strength > -50)
+      mp.display.drawBitmap(140, 110, signalFullIcon, TFT_GREEN, 2);
+    else if (strength <= -50 && strength > -75)
+      mp.display.drawBitmap(140, 110, signalHighIcon, TFT_GREEN, 2);
+    else if (strength <= -75 && strength > -95)
+      mp.display.drawBitmap(140, 110, signalLowIcon, TFT_YELLOW, 2);
+    else if (strength <= -95)
+      mp.display.drawBitmap(140, 110, noSignalIcon, TFT_RED, 2);
+    mp.display.setTextColor(TFT_BLACK);
+    mp.display.setCursor(140, 118);
+    mp.display.print(currentRSSI);
+
+  }
+  else
+  {
+    mp.display.setTextFont(1);
+    mp.display.setTextColor(TFT_YELLOW);
+    mp.display.setCursor(0, 115);
+    mp.display.print("NOT CONNECTED! (v");
+    mp.display.print(progVer);
+    mp.display.print(")");
+  }
+  mp.display.setTextColor(TFT_BLACK);
+  mp.display.setTextSize(1);
+  mp.display.setTextFont(2);
+  mp.display.drawString(title, 30, y + 2 );
+  mp.display.setTextColor(TFT_WHITE);
+  mp.display.setFreeFont(TT1);
+}
+void settingsMenuDrawCursor(uint8_t i, int32_t y, bool pressed) {
+  uint8_t boxHeight = 20;
+  y += i * boxHeight + settingsMenuYOffset;
+  mp.display.drawRect(0, y - 1, mp.display.width() - 1, boxHeight + 2, TFT_RED);
+  mp.display.drawRect(1, y, mp.display.width() - 3, boxHeight, TFT_RED);
+}
+int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
+  bool pressed = 0;
+  uint8_t cursor = _cursor;
+  int32_t cameraY = 0;
+  int32_t cameraY_actual = 0;
+  uint8_t boxHeight = 20;
+  bool blinkState = 0;
+  uint32_t blinkMillis = millis();
+  while (1) {
+    mp.update();
+    mp.display.fillScreen(TFT_BLACK);
+    mp.display.setCursor(0, 0);
+    cameraY_actual = (cameraY_actual + cameraY) / 2;
+    if (cameraY_actual - cameraY == 1) {
+      cameraY_actual = cameraY;
+    }
+    if (millis() - blinkMillis > 350)
+    {
+      blinkMillis = millis();
+      blinkState = !blinkState;
+    }
+    for (uint8_t i = 0; i < length; i++) {
+      settingsMenuDrawBox(title[i], i, cameraY_actual);
+    }
+    if (blinkState)
+      settingsMenuDrawCursor(cursor, cameraY_actual, pressed);
+
+    if (mp.buttons.timeHeld(BTN_DOWN) == 0 && mp.buttons.timeHeld(BTN_UP) == 0)
+      pressed = 0;
+
+    if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
+      mp.osc->note(75, 0.05);
+      mp.osc->play();
+
+      while (!mp.update()); // Exit when pressed
+      break;
+    }
+    //if(mp.buttons.released(BTN_HOME)) {
+    //WiFi.scanDelete();
+    //WiFi.disconnect(true); delay(10); // disable WIFI altogether
+    //WiFi.mode(WIFI_MODE_NULL); delay(10);
+    //while(!mp.update());
+    //mp.inCall=0;
+    //mp.update();
+    //mp.loader();
+    //}
+
+
+    if (mp.buttons.pressed(BTN_UP)) {  //BUTTON UP
+      blinkState = 1;
+      blinkMillis = millis();
+      mp.osc->note(75, 0.05);
+      mp.osc->play();
+      if (cursor == 0) {
+        cursor = length - 1;
+        if (length > 6) {
+          cameraY = -(cursor - 2) * boxHeight;
+        }
+      }
+      else {
+        cursor--;
+        if (cursor > 0 && (cursor * boxHeight + cameraY + settingsMenuYOffset) < boxHeight) {
+          cameraY += 15;
+        }
+      }
+      pressed = 1;
+    }
+
+    if (mp.buttons.pressed(BTN_DOWN)) { //BUTTON DOWN
+      blinkState = 1;
+      blinkMillis = millis();
+      mp.osc->note(75, 0.05);
+      mp.osc->play();
+      cursor++;
+      if ((cursor * boxHeight + cameraY + settingsMenuYOffset) > 128) {
+        cameraY -= boxHeight;
+      }
+      if (cursor >= length) {
+        cursor = 0;
+        cameraY = 0;
+
+      }
+      pressed = 1;
+    }
+
+
+    if (mp.buttons.released(BTN_B)) //BUTTON BACK
+    {
+      while (!mp.update());
+      return -1;
+    }
+  }
+
+  return cursor;
+
+}
+
+
+bool settingsApp() {
+  int8_t input = 0;
+  while (1)
+  {
+    mp.inCall = 0;
+    while (!mp.update());
+    input = settingsMenu(settingsItems, 4, input);
+    if (input == -1) //BUTTON BACK
+      break;
+    if (input == 0)
+      wifiConnect();
+    if (input == 1) {
+      mp.display.setTextColor(TFT_BLACK);
+      mp.display.setTextSize(1);
+      mp.display.setTextFont(2);
+      mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+      mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+      mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+      mp.display.setCursor(47, 54);
+      mp.display.printCenter("Not yet implemented!");
+      Serial.println("Not yet implemented!");
+      while (!mp.update());
+      delay(2000);
+    }
+    if (input == 2)
+      ntpTest();
+    if (input == 3)
+      wifiChat();
+    //if (input == 4)
+    //securityMenu();
+    //if (input == 5)
+    //if(updateMenu())
+    //return true;
+
+  }
+  return -1;
+}
+
+// --------------------
+// ----- NTP TEST -----
+// --------------------
 void ntpTest()
 {
- mp.inCall=1;
- while(!mp.update());
- mp.display.fillScreen(TFT_BLACK);
- while(1)
- {
-  while(!mp.update());
-  if(WiFi.status() != WL_CONNECTED)
-   {
+  mp.inCall = 1;
+  while (!mp.update());
+  mp.display.fillScreen(TFT_BLACK);
+  while (1)
+  {
+    while (!mp.update());
+    if (WiFi.status() != WL_CONNECTED)
+    {
       mp.display.setTextColor(TFT_BLACK);
       mp.display.setTextSize(1);
       mp.display.setTextFont(2);
@@ -57,184 +307,178 @@ void ntpTest()
       mp.display.setCursor(47, 54);
       mp.display.printCenter("Not connected! :(");
       Serial.println("Not connected! :(");
-      while(!mp.update());
+      while (!mp.update());
       delay(2000);
       return;
-   }
-  mp.display.setTextSize(1);
-  mp.display.setTextFont(1);
-  mp.display.setTextColor(TFT_GREEN);
-  mp.display.setCursor(0,115);
-  mp.display.print("Connected:");
-  mp.display.print(connectedToSSID);
+    }
+    mp.display.setTextSize(1);
+    mp.display.setTextFont(1);
+    mp.display.setTextColor(TFT_GREEN);
+    mp.display.setCursor(0, 115);
+    mp.display.print("Connected:");
+    mp.display.print(connectedToSSID);
     mp.display.fillRect(139, 109, 19, 18, TFT_LIGHTGREY);
     int strength = currentRSSI.toInt();
     //> -50 full
-    // < -40 && > -60 high
-    // < -60 && > -85 low
+    // < -50 && > -75 high
+    // < -75 && > -95 low
     // < -95 nosignal
-    if(strength > -50)
+    if (strength > -50)
       mp.display.drawBitmap(140, 110, signalFullIcon, TFT_GREEN, 2);
-    else if(strength <= -50 && strength > -70)
+    else if (strength <= -50 && strength > -75)
       mp.display.drawBitmap(140, 110, signalHighIcon, TFT_GREEN, 2);
-    else if(strength <= -70 && strength > -95)
+    else if (strength <= -75 && strength > -95)
       mp.display.drawBitmap(140, 110, signalLowIcon, TFT_YELLOW, 2);
-    else if(strength <= -95)
+    else if (strength <= -95)
       mp.display.drawBitmap(140, 110, noSignalIcon, TFT_RED, 2);
     mp.display.setTextColor(TFT_BLACK);
-    mp.display.setCursor(140,118);
+    mp.display.setCursor(140, 118);
     mp.display.print(currentRSSI);
-    
-  unsigned int localPort = 8888; // Fairly arbitrary
-  unsigned char inPacket[48];
-  // NTP time request packet
-  unsigned char outPacket[48] = {0b11100011, 0, 6, 0xEC, 0, 0 ,0, 0, 0, 0, 0, 0, 49, 0x4E, 49, 52, 0, 0, 0, 0, 0,
-                                 0, 0, 0, 0 ,0 ,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  WiFiUDP udp;
-  udp.begin(localPort);
-  statusline("Trying To Resolve Server", true);
-  Serial.println("Trying To Resolve Server");
 
-  /*-------------------------------------------------------------*/
-  /* Enable only one of the following two lines.                 */
-  /* Enable first line to use DNS to find an NTP server by name. */
-  /* Enable second line to use an NTP server's IP address.       */
-  /*-------------------------------------------------------------*/
-  udp.beginPacket("time.nist.gov", 123); // NTP requests are to port 123
-  //udp.beginPacket("129.6.15.28", 123); // NTP requests are to port 123
+    unsigned int localPort = 8888; // Fairly arbitrary
+    unsigned char inPacket[48];
+    // NTP time request packet
+    unsigned char outPacket[48] = {0b11100011, 0, 6, 0xEC, 0, 0 , 0, 0, 0, 0, 0, 0, 49, 0x4E, 49, 52, 0, 0, 0, 0, 0,
+                                   0, 0, 0, 0 , 0 , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                                  };
+    WiFiUDP udp;
+    udp.begin(localPort);
+    statusline("Trying To Resolve Server", true);
+    Serial.println("Trying To Resolve Server");
 
-  statusline("Trying To Resolve Server", false);
-  udp.write(outPacket, sizeof(outPacket));
-  udp.endPacket();
-  int count=100;
-  while(udp.parsePacket() < sizeof(inPacket) && --count)
-  {
-    statusline("NTP Waiting For Response", true);
-    Serial.println("NTP Waiting For Response");
-    delay(20);
-  
-      mp.buttons.update();
-      // Press A to select new WiFi Network
-      if(mp.buttons.released(BTN_A)) 
-        {
-          udp.stop();
-          wifiConnect();
-          ntpTest();
-          return;
-        }
-      // Press B or HOME to return to Menu
-      if(mp.buttons.released(BTN_B) || mp.buttons.released(BTN_HOME))
-        {
-          udp.stop();
-          return;
-        }
+    /*-------------------------------------------------------------*/
+    /* Enable only one of the following two lines.                 */
+    /* Enable first line to use DNS to find an NTP server by name. */
+    /* Enable second line to use an NTP server's IP address.       */
+    /*-------------------------------------------------------------*/
+    udp.beginPacket("time.nist.gov", 123); // NTP requests are to port 123
+    //udp.beginPacket("129.6.15.28", 123); // NTP requests are to port 123
 
-  }
-  statusline("NTP Waiting For Response", false);
-  if(count)
-  {
-    // NTP request honored - time is in packet
-    unsigned long ms = millis();
-    udp.read(inPacket, sizeof(inPacket));
-    unsigned long secsSince1900 = (inPacket[40]<<24) | (inPacket[41]<<16) | (inPacket[42]<<8) | inPacket[43];
-    long secsSinceEpoch = secsSince1900 - 2208988800UL;
-      long sse = secsSinceEpoch+(millis()-ms)/1000;
-      char *msg = ctime(&sse);
-      msg[24]='\0';
-      Serial.printf("Received: %s UTC\n",msg);
-      
-    // Extrapolate displayed time over 10 seconds
-    while(millis()-ms < 10000)
+    statusline("Trying To Resolve Server", false);
+    udp.write(outPacket, sizeof(outPacket));
+    udp.endPacket();
+    int count = 100;
+    while (udp.parsePacket() < sizeof(inPacket) && --count)
     {
-      // Extrapolate time now
-      long sse = secsSinceEpoch+(millis()-ms)/1000;
-      char *msg = ctime(&sse);
-      msg[24]='\0';
-      currentRSSI = WiFi.RSSI();
-      
-      // Display the extrapolated time - if top line is yellow, time is from NTP - if green, time is exratpolated
-      if(sse == secsSinceEpoch) mp.display.setTextColor(TFT_YELLOW);
-      else                      mp.display.setTextColor(TFT_GREEN);
-      mp.display.fillScreen(TFT_BLACK);
-      mp.display.setCursor(20,8);
-      mp.display.print("FROM: time.nist.gov");
-      mp.display.setTextColor(TFT_GREEN);
-      mp.display.setCursor(8,50);
-      mp.display.print(msg);
-      mp.display.print("\n\n            UTC");
-      mp.display.setTextColor(TFT_GREEN);
-      mp.display.setCursor(0,115);
-      mp.display.print("Connected:");
-      mp.display.print(connectedToSSID);
-    mp.display.fillRect(139, 109, 19, 18, TFT_LIGHTGREY);
-    int strength = currentRSSI.toInt();
-    //> -50 full
-    // < -40 && > -60 high
-    // < -60 && > -85 low
-    // < -95 nosignal
-    if(strength > -50)
-      mp.display.drawBitmap(140, 110, signalFullIcon, TFT_GREEN, 2);
-    else if(strength <= -50 && strength > -70)
-      mp.display.drawBitmap(140, 110, signalHighIcon, TFT_GREEN, 2);
-    else if(strength <= -70 && strength > -95)
-      mp.display.drawBitmap(140, 110, signalLowIcon, TFT_YELLOW, 2);
-    else if(strength <= -95)
-      mp.display.drawBitmap(140, 110, noSignalIcon, TFT_RED, 2);
-    mp.display.setTextColor(TFT_BLACK);
-    mp.display.setCursor(140,118);
-    mp.display.print(currentRSSI);
-      mp.display.pushSprite(0,0);
-      
+      statusline("NTP Waiting For Response", true);
+      Serial.println("NTP Waiting For Response");
+      delay(20);
+
       mp.buttons.update();
       // Press A to select new WiFi Network
-      if(mp.buttons.released(BTN_A)) 
-        {
-          udp.stop();
-          wifiConnect();
-          ntpTest();
-          return;
-        }
+      if (mp.buttons.released(BTN_A))
+      {
+        udp.stop();
+        wifiConnect();
+        ntpTest();
+        return;
+      }
       // Press B or HOME to return to Menu
-      if(mp.buttons.released(BTN_B) || mp.buttons.released(BTN_HOME))
-        {
-          udp.stop();
-          return;
-        }
+      if (mp.buttons.released(BTN_B) || mp.buttons.released(BTN_HOME))
+      {
+        udp.stop();
+        return;
+      }
 
     }
-  }
-  else
-  {
-    // NTP request not honored (either outgoing packet or incoming packet lost)
-    statusline("NTP No Response - Retry", true);
-    Serial.println("NTP No Response - Retry");
-    delay(1000);
-    statusline("NTP No Response - Retry", false);
-  }
-  // Shut down UDP in preparation for next loop
-  udp.stop();
-  
-  
- } // repeatedly loop ntpTest()
- 
+    statusline("NTP Waiting For Response", false);
+    if (count)
+    {
+      // NTP request honored - time is in packet
+      unsigned long ms = millis();
+      udp.read(inPacket, sizeof(inPacket));
+      unsigned long secsSince1900 = (inPacket[40] << 24) | (inPacket[41] << 16) | (inPacket[42] << 8) | inPacket[43];
+      long secsSinceEpoch = secsSince1900 - 2208988800UL;
+      long sse = secsSinceEpoch + (millis() - ms) / 1000;
+      char *msg = ctime(&sse);
+      msg[24] = '\0';
+      Serial.printf("Received: %s UTC\n", msg);
+
+      // Extrapolate displayed time over 10 seconds
+      while (millis() - ms < 10000)
+      {
+        // Extrapolate time now
+        long sse = secsSinceEpoch + (millis() - ms) / 1000;
+        char *msg = ctime(&sse);
+        msg[24] = '\0';
+        currentRSSI = WiFi.RSSI();
+
+        // Display the extrapolated time - if top line is yellow, time is from NTP - if green, time is exratpolated
+        if (sse == secsSinceEpoch) mp.display.setTextColor(TFT_YELLOW);
+        else                      mp.display.setTextColor(TFT_GREEN);
+        mp.display.fillScreen(TFT_BLACK);
+        mp.display.setCursor(20, 8);
+        mp.display.print("FROM: time.nist.gov");
+        mp.display.setTextColor(TFT_GREEN);
+        mp.display.setCursor(8, 50);
+        mp.display.print(msg);
+        mp.display.print("\n\n            UTC");
+        mp.display.setTextColor(TFT_GREEN);
+        mp.display.setCursor(0, 115);
+        mp.display.print("Connected:");
+        mp.display.print(connectedToSSID);
+        mp.display.fillRect(139, 109, 19, 18, TFT_LIGHTGREY);
+        int strength = currentRSSI.toInt();
+        //> -50 full
+        // < -50 && > -75 high
+        // < -75 && > -95 low
+        // < -95 nosignal
+        if (strength > -50)
+          mp.display.drawBitmap(140, 110, signalFullIcon, TFT_GREEN, 2);
+        else if (strength <= -50 && strength > -75)
+          mp.display.drawBitmap(140, 110, signalHighIcon, TFT_GREEN, 2);
+        else if (strength <= -75 && strength > -95)
+          mp.display.drawBitmap(140, 110, signalLowIcon, TFT_YELLOW, 2);
+        else if (strength <= -95)
+          mp.display.drawBitmap(140, 110, noSignalIcon, TFT_RED, 2);
+        mp.display.setTextColor(TFT_BLACK);
+        mp.display.setCursor(140, 118);
+        mp.display.print(currentRSSI);
+        mp.display.pushSprite(0, 0);
+
+        mp.buttons.update();
+        // Press A to select new WiFi Network
+        if (mp.buttons.released(BTN_A))
+        {
+          udp.stop();
+          wifiConnect();
+          ntpTest();
+          return;
+        }
+        // Press B or HOME to return to Menu
+        if (mp.buttons.released(BTN_B) || mp.buttons.released(BTN_HOME))
+        {
+          udp.stop();
+          return;
+        }
+
+      }
+    }
+    else
+    {
+      // NTP request not honored (either outgoing packet or incoming packet lost)
+      statusline("NTP No Response - Retry", true);
+      Serial.println("NTP No Response - Retry");
+      delay(1000);
+      statusline("NTP No Response - Retry", false);
+    }
+    // Shut down UDP in preparation for next loop
+    udp.stop();
+
+
+  } // repeatedly loop ntpTest()
+
 }
 
-// Display (on==true) or erase (on==false) transient status line near bottom of display
-void statusline(char *msg, bool on)
-{
-  mp.display.setTextColor(on ? TFT_YELLOW : TFT_BLACK);
-  mp.display.setCursor(0,100);
-  mp.display.print(msg);
-  mp.display.pushSprite(0,0);
-
-}
 
 
-
+// --------------------------
+// ----- CHOOSE NETWORK -----
+// --------------------------
 // Borrowed this from git:CircuitMess/CircuitMess-Ringo-firmware/blob/master/src/settingsApp.cpp
 void wifiConnect()
 {
-  mp.inCall=1;
+  mp.inCall = 1;
   mp.display.setTextColor(TFT_BLACK);
   mp.display.setTextSize(1);
   mp.display.setTextFont(2);
@@ -244,7 +488,7 @@ void wifiConnect()
   mp.display.setCursor(47, 54);
   mp.display.printCenter("Searching for networks");
   Serial.println("Searching for networks");
-  while(!mp.update());
+  while (!mp.update());
   bool blinkState = 1;
   unsigned long elapsedMillis = millis();
   bool helpPop;
@@ -271,20 +515,20 @@ void wifiConnect()
     WiFi.scanDelete();
     WiFi.disconnect(true); delay(10); // disable WIFI altogether
     WiFi.mode(WIFI_MODE_NULL); delay(10);
-    while(!mp.update());
+    while (!mp.update());
     uint32_t tempMillis = millis();
     WiFi.begin();
-    while(millis() < tempMillis + 2000)
+    while (millis() < tempMillis + 2000)
     {
       mp.update();
-      if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+      if (mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
       {
-        while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+        while (!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
           mp.update();
         break;
       }
     }
-    while(!mp.update());
+    while (!mp.update());
 
   }
   else
@@ -308,23 +552,23 @@ void wifiConnect()
       Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " " : "*");
       delay(10);
     }
-    while(1)
+    while (1)
     {
 
       int8_t selection = wifiNetworksMenu(networkNames, wifiSignalStrengths, n);
-      if(selection < 0)
+      if (selection < 0)
       {
-        while(!mp.update());
+        while (!mp.update());
         return;
       }
-      
+
       if (wifiPasswordNeeded[selection])
       {
         mp.textInput("");
         prevContent = "";
         content = "";
         mp.textPointer = 0;
-        while(!mp.update());
+        while (!mp.update());
         while (1)
         {
           mp.display.fillScreen(TFT_BLACK);
@@ -372,7 +616,7 @@ void wifiConnect()
 
           /*if(mp.buttons.released(BTN_FUN_RIGHT)){
               helpPop = !helpPop;
-              mp.display.drawIcon(TextHelperPopup, 0, 0, 160, 128, 1, TFT_WHITE); 
+              mp.display.drawIcon(TextHelperPopup, 0, 0, 160, 128, 1, TFT_WHITE);
               while(!mp.update());
             }
             while (helpPop) {
@@ -381,20 +625,20 @@ void wifiConnect()
               }
             mp.update();
             }*/
-          if((mp.buttons.released(BTN_A)) && content.length() > 0)
+          if ((mp.buttons.released(BTN_A)) && content.length() > 0)
           {
             Serial.println("Password set");
             mp.display.setCursor(20, 50);
             mp.display.fillRect(0, 28, 160, 100, TFT_BLACK);
-            mp.display.setCursor(0,40);
+            mp.display.setCursor(0, 40);
             mp.display.printCenter("Connecting");
             mp.display.setCursor(60, 60);
-            while(!mp.update());
+            while (!mp.update());
 
-            char temp[networkNames[selection].length()+1];
-            char temp2[content.length()+1];
-            networkNames[selection].toCharArray(temp, networkNames[selection].length()+1);
-            content.toCharArray(temp2, content.length()+1);
+            char temp[networkNames[selection].length() + 1];
+            char temp2[content.length() + 1];
+            networkNames[selection].toCharArray(temp, networkNames[selection].length() + 1);
+            content.toCharArray(temp2, content.length() + 1);
             Serial.print("Connecting to ");
             Serial.println(temp);
             connectedToSSID = temp;
@@ -404,7 +648,7 @@ void wifiConnect()
             {
               delay(1500);
               mp.display.print(".");
-              while(!mp.update());
+              while (!mp.update());
               counter++;
               if (counter >= 8)
               {
@@ -413,32 +657,32 @@ void wifiConnect()
                 mp.display.printCenter("Wrong password :(");
                 Serial.println("Wrong password :(");
                 uint32_t tempMillis = millis();
-                while(millis() < tempMillis + 2000)
+                while (millis() < tempMillis + 2000)
                 {
                   mp.update();
-                  if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+                  if (mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
                   {
-                    while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+                    while (!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
                       mp.update();
                     break;
                   }
                 }
-                while(!mp.update());
+                while (!mp.update());
                 break;
               }
             }
             Serial.print("Wifi status: ");
             Serial.println(WiFi.status());
-            if(WiFi.status() == WL_CONNECTED)
+            if (WiFi.status() == WL_CONNECTED)
             {
               mp.update();
               mp.display.setCursor(20, 50);
               mp.display.fillRect(0, 28, 160, 100, TFT_BLACK);
-              mp.display.setCursor(0,40);
+              mp.display.setCursor(0, 40);
               mp.display.printCenter("Connected!");
               Serial.println("Connection successful!");
               mp.display.setCursor(60, 60);
-              while(!mp.update());
+              while (!mp.update());
               delay(1000);
               mp.display.setTextSize(0);
               mp.display.setTextFont(1);
@@ -448,9 +692,9 @@ void wifiConnect()
             }
 
           }
-          if(mp.buttons.released(BTN_B))
+          if (mp.buttons.released(BTN_B))
           {
-            while(!mp.update());
+            while (!mp.update());
             return;
           }
           mp.update();
@@ -461,13 +705,13 @@ void wifiConnect()
         mp.display.fillScreen(TFT_BLACK);
         mp.display.setCursor(8, 8);
         mp.display.printCenter(networkNames[selection]);
-        mp.display.setCursor(0,40);
+        mp.display.setCursor(0, 40);
         mp.display.printCenter("Connecting");
         mp.display.setCursor(60, 60);
-        while(!mp.update());
+        while (!mp.update());
 
-        char temp[networkNames[selection].length()+1];
-        networkNames[selection].toCharArray(temp, networkNames[selection].length()+1);
+        char temp[networkNames[selection].length() + 1];
+        networkNames[selection].toCharArray(temp, networkNames[selection].length() + 1);
         Serial.println(temp);
         WiFi.begin(temp);
         uint8_t counter = 0;
@@ -475,7 +719,7 @@ void wifiConnect()
         {
           delay(1000);
           mp.display.print(".");
-          while(!mp.update());
+          while (!mp.update());
           counter++;
           if (counter >= 8)
           {
@@ -483,49 +727,49 @@ void wifiConnect()
             mp.display.setCursor(0, 45);
             mp.display.printCenter("Wi-Fi error!");
             uint32_t tempMillis = millis();
-            while(millis() < tempMillis + 2000)
+            while (millis() < tempMillis + 2000)
             {
               mp.update();
-              if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+              if (mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
               {
-                while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+                while (!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
                   mp.update();
                 break;
               }
             }
-            while(!mp.update());
+            while (!mp.update());
             break;
           }
         }
-        if(WiFi.status() == WL_DISCONNECTED)
+        if (WiFi.status() == WL_DISCONNECTED)
         {
-          
+
           mp.display.fillRect(0, 40, mp.display.width(), 60, TFT_BLACK);
           mp.display.setCursor(0, 45);
           mp.display.printCenter("Wi-Fi error!");
           uint32_t tempMillis = millis();
-          while(millis() < tempMillis + 2000)
+          while (millis() < tempMillis + 2000)
           {
             mp.update();
-            if(mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
+            if (mp.buttons.pressed(BTN_A) || mp.buttons.pressed(BTN_B))
             {
-              while(!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
+              while (!mp.buttons.released(BTN_A) && !mp.buttons.released(BTN_B))
                 mp.update();
               break;
             }
           }
-          while(!mp.update());
+          while (!mp.update());
           break;
         }
-        else if(WiFi.status() == WL_CONNECTED)
+        else if (WiFi.status() == WL_CONNECTED)
         {
           mp.update();
           mp.display.setCursor(20, 50);
           mp.display.fillRect(0, 28, 160, 100, TFT_BLACK);
-          mp.display.setCursor(0,40);
+          mp.display.setCursor(0, 40);
           mp.display.printCenter("Connected!");
           mp.display.setCursor(60, 60);
-          while(!mp.update());
+          while (!mp.update());
           delay(1000);
           mp.display.setTextSize(0);
           mp.display.setTextFont(1);
@@ -557,42 +801,42 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
     if (cameraY_actual - cameraY == 1) {
       cameraY_actual = cameraY;
     }
-    if(millis() - blinkMillis > 350)
+    if (millis() - blinkMillis > 350)
     {
       blinkMillis = millis();
       blinkState = !blinkState;
     }
     for (uint8_t i = 0; i < length; i++)
       wifiDrawBox(items[i], signals[i], i, cameraY_actual);
-    if(blinkState)
+    if (blinkState)
       wifiDrawCursor(cursor, cameraY_actual);
 
     mp.display.fillRect(0, 0, mp.display.width(), 20, TFT_DARKGREY);
     mp.display.setTextFont(2);
-    mp.display.setCursor(2,1);
+    mp.display.setCursor(2, 1);
     mp.display.drawFastHLine(0, 19, mp.display.width(), TFT_WHITE);
     mp.display.setTextSize(1);
     mp.display.setTextColor(TFT_WHITE);
     mp.display.print("Choose a network");
     mp.display.fillRect(0, 111, mp.display.width(), 30, TFT_DARKGREY);
     mp.display.setTextFont(2);
-    mp.display.setCursor(2,112);
+    mp.display.setCursor(2, 112);
     mp.display.drawFastHLine(0, 111, mp.display.width(), TFT_WHITE);
     mp.display.printCenter("Rescan            Select");
-    if(mp.released(BTN_FUN_RIGHT))
+    if (mp.released(BTN_FUN_RIGHT))
     {
-      while(!mp.update());
+      while (!mp.update());
       mp.playNotificationSound(cursor);
     }
 
     if (mp.buttons.released(BTN_A) || mp.buttons.released(BTN_FUN_RIGHT)) {   //BUTTON CONFIRM
-      while(!mp.update());
+      while (!mp.update());
       break;
     }
     if (mp.buttons.released(BTN_UP)) {  //BUTTON UP
       blinkState = 1;
       blinkMillis = millis();
-      while(!mp.update());
+      while (!mp.update());
       if (cursor == 0) {
         cursor = length - 1;
         if (length > 4) {
@@ -611,7 +855,7 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
     if (mp.buttons.pressed(BTN_DOWN)) { //BUTTON DOWN
       blinkState = 1;
       blinkMillis = millis();
-      while(!mp.update());
+      while (!mp.update());
       cursor++;
       if ((cursor * (boxHeight + 1) + cameraY + offset) > 100) {
         cameraY -= (boxHeight + 1);
@@ -625,7 +869,7 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
     }
     if (mp.buttons.released(BTN_B) || mp.buttons.released(BTN_HOME)) //BUTTON BACK
     {
-      while(!mp.update());
+      while (!mp.update());
       return -1;
     }
     if (mp.buttons.released(BTN_FUN_LEFT))
@@ -639,7 +883,7 @@ int8_t wifiNetworksMenu(String* items, String *signals, uint8_t length) {
       mp.display.setCursor(47, 54);
       mp.display.printCenter("Searching for networks");
       Serial.println("Searching for networks");
-      while(!mp.update());
+      while (!mp.update());
       wifiConnect();
       return -1;
     }
@@ -657,11 +901,11 @@ void wifiDrawBox(String text, String signalStrength, uint8_t i, int32_t y) {
   }
   mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 1, TFT_DARKGREY);
   mp.display.setTextColor(TFT_WHITE);
-  mp.display.setCursor(5, y+2);
-  for(uint16_t i = 0; i < text.length(); i++)
+  mp.display.setCursor(5, y + 2);
+  for (uint16_t i = 0; i < text.length(); i++)
   {
     mp.display.print(text[i]);
-    if(mp.display.getCursorX() > 120)
+    if (mp.display.getCursorX() > 120)
     {
       mp.display.print("...");
       break;
@@ -669,231 +913,45 @@ void wifiDrawBox(String text, String signalStrength, uint8_t i, int32_t y) {
   }
   int strength = signalStrength.toInt();
   //> -50 full
-  // < -40 && > -60 high
-  // < -60 && > -85 low
+  // < -50 && > -75 high
+  // < -75 && > -95 low
   // < -95 nosignal
-  if(strength > -50)
-    mp.display.drawBitmap(140, y+2, signalFullIcon, TFT_WHITE, 2);
-  else if(strength <= -50 && strength > -70)
-    mp.display.drawBitmap(140, y+2, signalHighIcon, TFT_WHITE, 2);
-  else if(strength <= -70 && strength > -95)
-    mp.display.drawBitmap(140, y+2, signalLowIcon, TFT_WHITE, 2);
-  else if(strength <= -95)
-    mp.display.drawBitmap(140, y+2, noSignalIcon, TFT_WHITE, 2);
+  if (strength > -50)
+    mp.display.drawBitmap(140, y + 2, signalFullIcon, TFT_WHITE, 2);
+  else if (strength <= -50 && strength > -75)
+    mp.display.drawBitmap(140, y + 2, signalHighIcon, TFT_WHITE, 2);
+  else if (strength <= -75 && strength > -95)
+    mp.display.drawBitmap(140, y + 2, signalLowIcon, TFT_WHITE, 2);
+  else if (strength <= -95)
+    mp.display.drawBitmap(140, y + 2, noSignalIcon, TFT_WHITE, 2);
 }
 void wifiDrawCursor(uint8_t i, int32_t y) {
   uint8_t offset = 23;
   uint8_t boxHeight = 20;
   y += i * (boxHeight + 2) + offset;
   mp.display.drawRect(1, y, mp.display.width() - 2, boxHeight + 1, TFT_RED);
-  mp.display.drawRect(0, y-1, mp.display.width(), boxHeight + 3, TFT_RED);
+  mp.display.drawRect(0, y - 1, mp.display.width(), boxHeight + 3, TFT_RED);
 }
 
 
-
- // Borrowed from settingsApp
-boolean colorSetup = 0;
-String settingsItems[3] PROGMEM = {
-    "Choose Network",
-    "DHCP Settings",
-    "NTP Test"
-};
-
-void settingsMenuDrawBox(String title, uint8_t i, int32_t y) {
-  uint8_t scale = 2;
-  uint8_t boxHeight = 20;
-  y += i * boxHeight + settingsMenuYOffset;
-  if (y < 0 || y > mp.display.width()) {
-    return;
-  }
-
-  if (title == "Choose Network") //red
-  {
-    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight-2, 0xFB6D);
-    mp.display.drawBitmap(6, y + 2*scale, network, 0x7800);
-  }
-  if (title == "DHCP Settings") //green
-  {
-    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight-2, 0x8FEA);
-    mp.display.drawBitmap(6, y + 2*scale, composeIcon, 0x0341);
-  }
-  if (title == "NTP Test") //yellow
-  {
-    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight-2, 0xFFED);
-    mp.display.drawBitmap(6, y + 2*scale, timeIcon, 0x6B60);
-  }
-  if (title == "Sound")//blue
-  {
-    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight-2, 0xA7FF);
-    //mp.display.drawBitmap(6, y + 2*scale, soundIcon, 0x010F);
-  }
-  if (title == "Security")//purple
-  {
-    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight-2, 0xED1F);
-    //mp.display.drawBitmap(6, y + 2*scale, security, 0x600F);
-  }
-  if (title == "About & update")//orange
-  {
-    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight-2, 0xFD29);
-    //mp.display.drawBitmap(6, y + 2*scale, about, 0x8200);
-  }
-  if(WiFi.status() == WL_CONNECTED)
-   {
-    currentRSSI = WiFi.RSSI();
-    mp.display.setTextFont(1);
-    mp.display.setTextColor(TFT_GREEN);
-    mp.display.setCursor(0,115);
-    mp.display.print("Connected:");
-    mp.display.print(connectedToSSID);
-    mp.display.fillRect(139, 109, 19, 18, TFT_LIGHTGREY);
-    int strength = currentRSSI.toInt();
-    //> -50 full
-    // < -40 && > -60 high
-    // < -60 && > -85 low
-    // < -95 nosignal
-    if(strength > -50)
-      mp.display.drawBitmap(140, 110, signalFullIcon, TFT_GREEN, 2);
-    else if(strength <= -50 && strength > -70)
-      mp.display.drawBitmap(140, 110, signalHighIcon, TFT_GREEN, 2);
-    else if(strength <= -70 && strength > -95)
-      mp.display.drawBitmap(140, 110, signalLowIcon, TFT_YELLOW, 2);
-    else if(strength <= -95)
-      mp.display.drawBitmap(140, 110, noSignalIcon, TFT_RED, 2);
-    mp.display.setTextColor(TFT_BLACK);
-    mp.display.setCursor(140,118);
-    mp.display.print(currentRSSI);
-
-   }
-  else
-   {
-    mp.display.setTextFont(1);
-    mp.display.setTextColor(TFT_YELLOW);
-    mp.display.setCursor(0,115);
-    mp.display.print("NOT CONNECTED!");
-   }
-  mp.display.setTextColor(TFT_BLACK);
+// --------------------------
+// ----- WiFiChatServer -----
+// --------------------------
+void wifiChat() {
+  mp.inCall = 1;
+  Serial.println("Requesting server on port 23...");
+  WiFiServer server(23);
+  WiFiClient clients[8];
+  Serial.println("...done.");
+  boolean alreadyConnected = false; // whether or not the client was connected previously
+  Serial.println("cls");
+  mp.display.fillScreen(TFT_BLACK);
+  mp.display.setCursor(0,0);
   mp.display.setTextSize(1);
-  mp.display.setTextFont(2);
-  mp.display.drawString(title, 30, y + 2 );
-  mp.display.setTextColor(TFT_WHITE);
-  mp.display.setFreeFont(TT1);
-}
-void settingsMenuDrawCursor(uint8_t i, int32_t y, bool pressed) {
-  uint8_t boxHeight = 20;
-  y += i * boxHeight + settingsMenuYOffset;
-  mp.display.drawRect(0, y-1, mp.display.width()-1, boxHeight+2, TFT_RED);
-  mp.display.drawRect(1, y, mp.display.width()-3, boxHeight, TFT_RED);
-}
-int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
-  bool pressed = 0;
-  uint8_t cursor = _cursor;
-  int32_t cameraY = 0;
-  int32_t cameraY_actual = 0;
-  uint8_t boxHeight = 20;
-  bool blinkState = 0;
-  uint32_t blinkMillis = millis();
-  while (1) {
-    mp.update();
-    mp.display.fillScreen(TFT_BLACK);
-    mp.display.setCursor(0, 0);
-    cameraY_actual = (cameraY_actual + cameraY) / 2;
-    if (cameraY_actual - cameraY == 1) {
-      cameraY_actual = cameraY;
-    }
-    if(millis() - blinkMillis > 350)
+  mp.display.setTextFont(1);
+  while (!mp.update());
+    if (WiFi.status() != WL_CONNECTED)
     {
-      blinkMillis = millis();
-      blinkState = !blinkState;
-    }
-    for (uint8_t i = 0; i < length; i++) {
-      settingsMenuDrawBox(title[i], i, cameraY_actual);
-    }
-    if(blinkState)
-      settingsMenuDrawCursor(cursor, cameraY_actual, pressed);
-
-    if (mp.buttons.timeHeld(BTN_DOWN) == 0 && mp.buttons.timeHeld(BTN_UP) == 0)
-      pressed = 0;
-
-    if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-      mp.osc->note(75, 0.05);
-      mp.osc->play();
-
-      while(!mp.update());// Exit when pressed
-      break;
-    }
-    //if(mp.buttons.released(BTN_HOME)) {
-      //WiFi.scanDelete();
-      //WiFi.disconnect(true); delay(10); // disable WIFI altogether
-      //WiFi.mode(WIFI_MODE_NULL); delay(10);
-      //while(!mp.update());
-      //mp.inCall=0;
-      //mp.update();
-      //mp.loader();
-    //}
-
-
-    if (mp.buttons.pressed(BTN_UP)) {  //BUTTON UP
-      blinkState = 1;
-      blinkMillis = millis();
-      mp.osc->note(75, 0.05);
-      mp.osc->play();
-      if (cursor == 0) {
-        cursor = length - 1;
-        if (length > 6) {
-          cameraY = -(cursor - 2) * boxHeight;
-        }
-      }
-      else {
-        cursor--;
-        if (cursor > 0 && (cursor * boxHeight + cameraY + settingsMenuYOffset) < boxHeight) {
-          cameraY += 15;
-        }
-      }
-      pressed = 1;
-    }
-
-    if (mp.buttons.pressed(BTN_DOWN)) { //BUTTON DOWN
-      blinkState = 1;
-      blinkMillis = millis();
-      mp.osc->note(75, 0.05);
-      mp.osc->play();
-      cursor++;
-      if ((cursor * boxHeight + cameraY + settingsMenuYOffset) > 128) {
-        cameraY -= boxHeight;
-      }
-      if (cursor >= length) {
-        cursor = 0;
-        cameraY = 0;
-
-      }
-      pressed = 1;
-    }
-
-
-    if (mp.buttons.released(BTN_B)) //BUTTON BACK
-    {
-      while(!mp.update());
-      return -1;
-    }
-  }
-
-  return cursor;
-
-}
-
-
-bool settingsApp() {
-  int8_t input = 0;
-  while (1)
-  {
-    mp.inCall=0;
-    while(!mp.update());
-    input = settingsMenu(settingsItems, 3, input);
-    if (input == -1) //BUTTON BACK
-      break;
-    if (input == 0)
-      wifiConnect();
-    if (input == 1){
       mp.display.setTextColor(TFT_BLACK);
       mp.display.setTextSize(1);
       mp.display.setTextFont(2);
@@ -901,21 +959,89 @@ bool settingsApp() {
       mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
       mp.display.fillRect(5, 50, 150, 26, 0xFD29);
       mp.display.setCursor(47, 54);
-      mp.display.printCenter("Not yet implemented!");
-      Serial.println("Not yet implemented!");
-      while(!mp.update());
+      mp.display.printCenter("Not connected! :(");
+      Serial.println("Not connected! :(");
+      while (!mp.update());
       delay(2000);
+      return;
     }
-    if (input == 2)
-      ntpTest();
-    //if (input == 3)
-      //soundMenu();
-    //if (input == 4)
-      //securityMenu();
-    //if (input == 5)
-      //if(updateMenu())
-        //return true;
-        
+    Serial.println("Starting server...");
+    server.begin();
+    Serial.println("check for IP");
+    ip = WiFi.localIP();
+    Serial.println(ip);
+    mp.display.setTextColor(TFT_GREEN);
+    mp.display.print("Telnet: ");
+    mp.display.print(ip);
+    mp.display.setTextColor(TFT_YELLOW);
+    mp.display.println(":23");
+    mp.display.setTextColor(TFT_WHITE);
+    mp.display.pushSprite(0,0);
+    
+  while (1) {
+    // check for any new client connecting, and say hello (before any incoming data)
+  WiFiClient newClient = server.accept();
+  if (newClient) {
+    for (byte i=0; i < 8; i++) {
+      if (!clients[i]) {
+        Serial.print("We have a new client #");
+        Serial.println(i);
+        newClient.print("Hello, client number: ");
+        newClient.println(i);
+        mp.display.print("Hello, client number: ");
+        mp.display.println(i);
+        mp.display.pushSprite(0,0);
+        // Once we "accept", the client is no longer tracked by EthernetServer
+        // so we must store it into our list of clients
+        clients[i] = newClient;
+        break;
+      }
+    }
   }
-  return -1;
+
+  // check for incoming data from all clients
+  for (byte i=0; i < 8; i++) {
+    if (clients[i] && clients[i].available() > 0) {
+      // read bytes from a client
+      byte buffer[80];
+      int count = clients[i].read(buffer, 80);
+      // write the bytes to all other connected clients
+      for (byte j=0; j < 8; j++) {
+        if (j != i && clients[j].connected()) {
+          clients[j].write(buffer, count);
+        }
+      }
+    }
+  }
+
+  // stop any clients which disconnect
+  for (byte i=0; i < 8; i++) {
+    if (clients[i] && !clients[i].connected()) {
+      Serial.print("disconnect client #");
+      Serial.println(i);
+      mp.display.print("Disconnect client number: ");
+      mp.display.println(i);
+      mp.display.pushSprite(0,0);
+      clients[i].stop();
+    }
+  }
+
+    // check for B button to exit
+    mp.buttons.update();
+    if (mp.buttons.released(BTN_B))
+    {
+      for (byte i=0; i < 8; i++) {
+        if (clients[i] && clients[i].connected()) {
+        Serial.print("disconnect client #");
+        Serial.println(i);
+        mp.display.print("Disconnect client #: ");
+        mp.display.println(i);
+        mp.display.pushSprite(0,0);
+        clients[i].stop();
+        }
+      }
+      delay(1000);
+      return;
+    }
+  }
 }
