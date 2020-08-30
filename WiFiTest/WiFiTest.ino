@@ -1,7 +1,7 @@
 // Example originally coded 5/10/2020 by Frank Prindle.
 // Additional code added by TheWebMachine 6/6/2020 onward (most of which sourced from https://github.com/CircuitMess/)
 
-const String progVer = "0.4.0";
+const String progVer = "0.4.1";
 const byte network[] PROGMEM = {16, 12, B00011111, B10000000, B00100000, B01000000, B01000000, B00100000, B10000000, B00010000, B00011111, B10000000, B00100000, B01000000, B01000000, B00100000, B00001111, B00000000, B00010000, B10000000, B00000000, B00000000, B00000110, B00000000, B00001111, B00000000,};
 const byte composeIcon[] PROGMEM = {16, 9, B01111111, B10000000, B10000000, B01000000, B10111111, B01000000, B10000000, B01000000, B10111110, B01000000, B10000000, B01000000, B01001111, B10000000, B01010000, B00000000, B01100000, B00000000,};
 const byte timeIcon[] PROGMEM = {16, 12, B00011111, B10000000, B00100000, B01000000, B01000100, B00100000, B10000100, B00010000, B10000100, B00010000, B10000100, B00010000, B10000111, B10010000, B10000000, B00010000, B10000000, B00010000, B01000000, B00100000, B00100000, B01000000, B00011111, B10000000,};
@@ -12,6 +12,7 @@ MAKERphone mp;
 
 String connectedToSSID;
 String currentRSSI;
+boolean rebootNeeded = 0;
 IPAddress ip;
 
 void setup()
@@ -939,6 +940,7 @@ void wifiDrawCursor(uint8_t i, int32_t y) {
 // --------------------------
 void wifiChat() {
   mp.inCall = 1;
+  while (!mp.update());
   Serial.println("Requesting server on port 23...");
   WiFiServer server(23);
   WiFiClient clients[8];
@@ -950,33 +952,50 @@ void wifiChat() {
   mp.display.setTextSize(1);
   mp.display.setTextFont(1);
   while (!mp.update());
-    if (WiFi.status() != WL_CONNECTED)
-    {
-      mp.display.setTextColor(TFT_BLACK);
-      mp.display.setTextSize(1);
-      mp.display.setTextFont(2);
-      mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
-      mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
-      mp.display.fillRect(5, 50, 150, 26, 0xFD29);
-      mp.display.setCursor(47, 54);
-      mp.display.printCenter("Not connected! :(");
-      Serial.println("Not connected! :(");
-      while (!mp.update());
-      delay(2000);
-      return;
-    }
-    Serial.println("Starting server...");
-    server.begin();
-    Serial.println("check for IP");
-    ip = WiFi.localIP();
-    Serial.println(ip);
-    mp.display.setTextColor(TFT_GREEN);
-    mp.display.print("Telnet: ");
-    mp.display.print(ip);
-    mp.display.setTextColor(TFT_YELLOW);
-    mp.display.println(":23");
-    mp.display.setTextColor(TFT_WHITE);
-    mp.display.pushSprite(0,0);
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    mp.display.setTextColor(TFT_BLACK);
+    mp.display.setTextSize(1);
+    mp.display.setTextFont(2);
+    mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+    mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+    mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+    mp.display.setCursor(47, 54);
+    mp.display.printCenter("Not connected! :(");
+    Serial.println("Not connected! :(");
+    while (!mp.update());
+    delay(2000);
+    return;
+  }
+  if (rebootNeeded)
+  {
+    mp.display.setTextColor(TFT_BLACK);
+    mp.display.setTextSize(1);
+    mp.display.setTextFont(2);
+    mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+    mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+    mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+    mp.display.setCursor(47, 54);
+    mp.display.printCenter("Reboot needed! :(");
+    Serial.println("Reboot needed! :(");
+    while (!mp.update());
+    delay(2000);
+    return;
+  }
+  else 
+    rebootNeeded = 1;
+  Serial.println("Starting server...");
+  server.begin();
+  Serial.println("check for IP");
+  ip = WiFi.localIP();
+  Serial.println(ip);
+  mp.display.setTextColor(TFT_GREEN);
+  mp.display.print("Telnet: ");
+  mp.display.print(ip);
+  mp.display.setTextColor(TFT_YELLOW);
+  mp.display.println(":23");
+  mp.display.setTextColor(TFT_WHITE);
+  while (!mp.update());
     
   while (1) {
     // check for any new client connecting, and say hello (before any incoming data)
@@ -990,7 +1009,7 @@ void wifiChat() {
         newClient.println(i);
         mp.display.print("Hello, client number: ");
         mp.display.println(i);
-        mp.display.pushSprite(0,0);
+        while (!mp.update());
         // Once we "accept", the client is no longer tracked by EthernetServer
         // so we must store it into our list of clients
         clients[i] = newClient;
@@ -1021,7 +1040,7 @@ void wifiChat() {
       Serial.println(i);
       mp.display.print("Disconnect client number: ");
       mp.display.println(i);
-      mp.display.pushSprite(0,0);
+      while (!mp.update());
       clients[i].stop();
     }
   }
@@ -1036,7 +1055,7 @@ void wifiChat() {
         Serial.println(i);
         mp.display.print("Disconnect client #: ");
         mp.display.println(i);
-        mp.display.pushSprite(0,0);
+        while (!mp.update());
         clients[i].stop();
         }
       }
