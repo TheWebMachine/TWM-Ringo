@@ -23,7 +23,7 @@ If you attempt to access NTP Test or Chat Server without being connected to Wifi
  * This app will show you the current IP of the Ringo (and a reminder that telnet is port 23). Use a telnet client like PuTTY to connect. 
  * To see it actually work, you need more than one client connected at a time, as messages will not be repeated on the originating client.
  * Press B to return to the Main Menu
- * _KNOWN BUG: After you have run the Chat Server once, you'll have to reboot before it can be ran again. Connections will be refused on subsequent runs without reboot. Still sorting this out._
+ * _KNOWN BUG: After you have run the Chat Server once, you'll have to reboot before it can be ran again. Connections will be refused on subsequent runs without reboot. Still sorting this out. You will be reminded to reboot if you try to run it a second time._
 -----
 _**Recent Changes:**_
  * Added Telnet Chat Server
