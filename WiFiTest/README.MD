@@ -3,7 +3,7 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 
 ![Screenshot](WiFiTest_screenshot_0.4.0.jpg)
 
-**v0.4.0 - Now with Telnet Chat Server**
+**v0.4.1 - Now with Telnet Chat Server**
 
 When the app starts, you're shown the **Main Menu**:
  * **Choose Network** - _Always start here_. You'll need to connect to your Wifi network before you do anything else.
