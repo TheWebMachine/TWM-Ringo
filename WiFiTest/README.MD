@@ -6,7 +6,7 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 **v0.5.0 - Now with Telnet Chat Server and saved WiFi settings!**
 
 When the app starts, you're shown the **Main Menu**:
- * **Choose Network** - _Always start here_. You'll need to connect to your Wifi network before you do anything else. __NEW! When you successfully connect to a network, these settings will be saved on the SD card and loaded on app start to allow for automatic reconnection to your last used network__
+ * **Choose Network** - _Always start here_. You'll need to connect to your Wifi network before you do anything else. _**NEW! When you successfully connect to a network, these settings will be saved on the SD card and loaded on app start to allow for automatic reconnection to your last used network**_
  * **DHCP Settings** - _Not yet implemented_. This will eventually allow you to specify more network settings like IP, DNS, NTP server, etc
  * **NTP Test** - The first test added to this app, originally written by Frank Prindle.
  * **Chat Server** - A Telnet chat server for multiple clients to connect to. PuTTY works well with this (duplicate multiple sessions to see it in action). Messages sent by one client are sent to all other connected clients.
@@ -26,6 +26,7 @@ If you attempt to access NTP Test or Chat Server without being connected to Wifi
  * _KNOWN BUG: After you have run the Chat Server once, you'll have to reboot before it can be ran again. Connections will be refused on subsequent runs without reboot. Still sorting this out. You will be reminded to reboot if you try to run it a second time._
 -----
 _**Recent Changes:**_
+ * Now your last used WiFi network is saved to the SD card and we try to reconnect to it on app launch
  * Added Telnet Chat Server
  * Added a live signal strength meter to the bottom status line
  * Added back homePopup() when you press the HOME button (fixed the restart issue)
