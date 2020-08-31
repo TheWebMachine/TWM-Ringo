@@ -3,10 +3,10 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 
 ![Screenshot](WiFiTest_screenshot_0.4.0.jpg) ![Screenshot](WiFiTest_ChatServer_screenshot_0.4.1.jpg)
 
-**v0.4.1 - Now with Telnet Chat Server**
+**v0.5.0 - Now with Telnet Chat Server and saved WiFi settings!**
 
 When the app starts, you're shown the **Main Menu**:
- * **Choose Network** - _Always start here_. You'll need to connect to your Wifi network before you do anything else.
+ * **Choose Network** - _Always start here_. You'll need to connect to your Wifi network before you do anything else. __NEW! When you successfully connect to a network, these settings will be saved on the SD card and loaded on app start to allow for automatic reconnection to your last used network__
  * **DHCP Settings** - _Not yet implemented_. This will eventually allow you to specify more network settings like IP, DNS, NTP server, etc
  * **NTP Test** - The first test added to this app, originally written by Frank Prindle.
  * **Chat Server** - A Telnet chat server for multiple clients to connect to. PuTTY works well with this (duplicate multiple sessions to see it in action). Messages sent by one client are sent to all other connected clients.
