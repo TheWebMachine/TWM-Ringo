@@ -1,7 +1,7 @@
 // Example originally coded 5/10/2020 by Frank Prindle.
 // Additional code added by TheWebMachine 6/6/2020 onward (most of which sourced from https://github.com/CircuitMess/)
 
-const String progVer = "0.5.0";
+const String progVer = "0.5.1";
 const byte network[] PROGMEM = {16, 12, B00011111, B10000000, B00100000, B01000000, B01000000, B00100000, B10000000, B00010000, B00011111, B10000000, B00100000, B01000000, B01000000, B00100000, B00001111, B00000000, B00010000, B10000000, B00000000, B00000000, B00000110, B00000000, B00001111, B00000000,};
 const byte composeIcon[] PROGMEM = {16, 9, B01111111, B10000000, B10000000, B01000000, B10111111, B01000000, B10000000, B01000000, B10111110, B01000000, B10000000, B01000000, B01001111, B10000000, B01010000, B00000000, B01100000, B00000000,};
 const byte timeIcon[] PROGMEM = {16, 12, B00011111, B10000000, B00100000, B01000000, B01000100, B00100000, B10000100, B00010000, B10000100, B00010000, B10000100, B00010000, B10000111, B10010000, B10000000, B00010000, B10000000, B00010000, B01000000, B00100000, B00100000, B01000000, B00011111, B10000000,};
@@ -14,6 +14,7 @@ String connectedToSSID;
 String connectedToPass;
 String currentRSSI;
 boolean rebootNeeded = 0;
+boolean disconnectWiFi = 0;
 IPAddress ip;
 File SettingsFile;
 
@@ -48,6 +49,7 @@ void statusline(char *msg, bool on)
 
 void reconnectWiFi()
 {
+  if (disconnectWiFi) return;
   if (WiFi.status() != WL_CONNECTED && connectedToSSID.length() > 0)
     {
       Serial.print("Reconnecting to: ");
@@ -55,17 +57,30 @@ void reconnectWiFi()
       mp.display.setTextColor(TFT_BLACK);
       mp.display.setTextSize(1);
       mp.display.setTextFont(2);
-      mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
-      mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
-      mp.display.fillRect(5, 50, 150, 26, 0xFD29);
-      mp.display.setCursor(47, 54);
+      mp.display.drawRect(4, 49, 152, 46, TFT_BLACK);
+      mp.display.drawRect(3, 48, 154, 50, TFT_BLACK);
+      mp.display.fillRect(5, 50, 150, 44, 0xFD29);
+      mp.display.setCursor(47, 48);
       mp.display.printCenter("Connecting WiFi...");
+      mp.display.setCursor(47, 62);
+      mp.display.printCenter(connectedToSSID);
+      mp.display.setCursor(47, 76);
+      mp.display.printCenter("(press B to cancel)");
       while (!mp.update());
       WiFi.begin(connectedToSSID.c_str(), connectedToPass.c_str());
-      for (int i = 0; i < 10; ++i) {
+      for (int i = 0; i < 100; ++i) {
         if (WiFi.status() != WL_CONNECTED)
         {
-          delay(500);
+          while (!mp.update());
+          if (mp.buttons.released(BTN_B)) {
+            disconnectWiFi = 1;
+            WiFi.scanDelete();
+            WiFi.disconnect(true); delay(10); // disable WIFI altogether
+            WiFi.mode(WIFI_MODE_NULL); delay(10);
+            while(!mp.update());
+            return;
+          }
+          delay(50);
         }
         else return;
       }
@@ -279,6 +294,16 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
     //mp.loader();
     //}
 
+    if (mp.buttons.released(BTN_FUN_LEFT) || mp.buttons.released(BTN_FUN_RIGHT)) {
+      disconnectWiFi = !disconnectWiFi;
+      if (disconnectWiFi) {
+        WiFi.scanDelete();
+        WiFi.disconnect(true); delay(10); // disable WIFI altogether
+        WiFi.mode(WIFI_MODE_NULL); delay(10);
+        while(!mp.update());
+      }
+      else reconnectWiFi();
+    }
 
     if (mp.buttons.pressed(BTN_UP)) {  //BUTTON UP
       blinkState = 1;
@@ -374,6 +399,8 @@ bool settingsApp() {
 void ntpTest()
 {
   mp.inCall = 1;
+  disconnectWiFi = 0;
+  reconnectWiFi();
   while (!mp.update());
   mp.display.fillScreen(TFT_BLACK);
   while (1)
@@ -773,6 +800,7 @@ void wifiConnect()
               mp.display.setTextFont(1);
               mp.display.fillScreen(TFT_BLACK);
               mp.display.setCursor(0, 0);
+              disconnectWiFi = 0;
               writeToSD();
               return;
             }
@@ -1026,6 +1054,8 @@ void wifiDrawCursor(uint8_t i, int32_t y) {
 // --------------------------
 void wifiChat() {
   mp.inCall = 1;
+  disconnectWiFi = 0;
+  reconnectWiFi();
   while (!mp.update());
   Serial.println("Requesting server on port 23...");
   WiFiServer server(23);
