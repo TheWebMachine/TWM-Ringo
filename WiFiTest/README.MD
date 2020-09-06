@@ -3,11 +3,11 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 
 ![Screenshot](WiFiTest_screenshot_0.4.0.jpg) ![Screenshot](WiFiTest_ChatServer_screenshot_0.4.1.jpg)
 
-**v0.5.1 - Now with Telnet Chat Server and saved WiFi settings!**
+**v0.6.0 - Now with DHCP Settings!**
 
 When the app starts, you're shown the **Main Menu**:
  * **Choose Network** - _Always start here_. You'll need to connect to your Wifi network before you do anything else. _**NEW! When you successfully connect to a network, these settings will be saved on the SD card and loaded on app start to allow for automatic reconnection to your last used network.**_ While at Main Menu, pressing either softkey will disconnect/reconnect the WiFi network. **NOTE: WiFi Password is saved to SD card in cleartext!**
- * **DHCP Settings** - _Not yet implemented_. This will eventually allow you to specify more network settings like IP, DNS, NTP server, etc
+ * **DHCP Settings** - This will allow you to specify more network settings like IP, DNS, NTP server, etc
  * **NTP Test** - The first test added to this app, originally written by Frank Prindle.
  * **Chat Server** - A Telnet chat server for multiple clients to connect to. PuTTY works well with this (duplicate multiple sessions to see it in action). Messages sent by one client are sent to all other connected clients.
  
@@ -26,6 +26,8 @@ If you attempt to access NTP Test or Chat Server without being connected to Wifi
  * _KNOWN BUG: After you have run the Chat Server once, you'll have to reboot before it can be ran again. Connections will be refused on subsequent runs without reboot. Still sorting this out. You will be reminded to reboot if you try to run it a second time._
 -----
 _**Recent Changes:**_
+ * DHCP Settings section is now available. You can turn DHCP on/off and manually specify your IP/GW/SubnetMask/DNS/NTP settings.
+ * FIX: Connecting to Open/password-less networks was not being saved properly.
  * Now your last used WiFi network is saved to the SD card and we try to reconnect to it on app launch. Press either softkey at Main Menu to Disconnect/Reconnect WiFi.
  * Added Telnet Chat Server
  * Added a live signal strength meter to the bottom status line
@@ -34,6 +36,20 @@ _**Recent Changes:**_
 
 -----
 _**Future Plans:**_
- * _Addition of a settings screen so you can specify DHCP or manual IP/DNS setup, NTP server, and other future options_
  * _More tests, like Ping, Tracenet, etc...and perhaps some more creative tests as they are thought of_
   
+-----
+_**Latest settings.txt format:**_
+ * `[SSID]|[Pass(plaintext)]|[DHCP(bool)]|[DeviceIP]|[GatewayIP]|[SubnetMask]|[DNSserver]|[NTPserver]`
+
+**Example:**
+ * `TWM-2G|myPassW0rd|0|192.168.1.100|192.168.1.1|255.255.255.0|8.8.8.8|time.nist.gov`
+
+_**NOTES:**_ 
+ * The settings text must be the FIRST line in the file
+ * Pipe `|` chars separate the parameters. So, if you leave settings blank, pipes must remain...I see 7 pipes above; that's what you should have, regardless of how many parameters are filled in! _(the app will fill in empty manual IPs with 0.0.0.0 when saving the file)_
+ * A blank Pass is perfectly normal if you are using an open/unsecured WiFi
+ * If the DHCP boolean is set to 1, the manual addresses will still be read, but not applied to the connection
+ * If DHCP is 0, **all four** IP settings must be provided or DHCP will be used
+ * NTP will default to `time.nist.gov` if not specified and custom NTP will be used even if DHCP is 1
+ * You may use a hostname or IP address for NTP
