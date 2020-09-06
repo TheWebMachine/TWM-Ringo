@@ -6,7 +6,7 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 **v0.6.0 - Now with DHCP Settings!**
 
 When the app starts, you're shown the **Main Menu**:
- * **Choose Network** - _Always start here_. You'll need to connect to your Wifi network before you do anything else. _**NEW! When you successfully connect to a network, these settings will be saved on the SD card and loaded on app start to allow for automatic reconnection to your last used network.**_ While at Main Menu, pressing either softkey will disconnect/reconnect the WiFi network. **NOTE: WiFi Password is saved to SD card in cleartext!**
+ * **Choose Network** - _Always start here_. You'll need to connect to your Wifi network before you do anything else. _**NEW! When you successfully connect to a network, these settings will be saved on the SD card and loaded on app start to allow for automatic reconnection to your last used network.**_ While at Main Menu, pressing either softkey will disconnect/reconnect the WiFi network. **NOTE: WiFi Password is saved to SD card in plaintext!**
  * **DHCP Settings** - This will allow you to specify more network settings like IP, DNS, NTP server, etc
  * **NTP Test** - The first test added to this app, originally written by Frank Prindle.
  * **Chat Server** - A Telnet chat server for multiple clients to connect to. PuTTY works well with this (duplicate multiple sessions to see it in action). Messages sent by one client are sent to all other connected clients.
