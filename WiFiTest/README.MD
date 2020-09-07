@@ -4,7 +4,7 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 ![Screenshot](WiFiTest_screenshot_0.4.0.jpg) ![Screenshot](WiFiTest_DHCPSettings_screenshot.jpg)
 ![Screenshot](WiFiTest_ChatServer_screenshot_0.4.1.jpg)
 
-**v1.0.2 - WeCanHazFancyMenus!**
+**v1.0.3 - WeCanHazFancyMenus!**
 
 When the app starts, you're shown the **Main Menu**:
  * **Choose Network** - _Always start here_. You'll need to connect to your Wifi network before you do anything else. _**NEW! When you successfully connect to a network, these settings will be saved on the SD card and loaded on app start to allow for automatic reconnection to your last used network.**_ While at Main Menu, pressing either `Softkey` will disconnect/reconnect the WiFi network. **NOTE: WiFi Password is saved to SD card in plaintext!**
@@ -34,7 +34,8 @@ If you attempt to access NTP Test or Chat Server without being connected to Wifi
  * _KNOWN BUG: After you have run the Chat Server once, you'll have to reboot before it can be ran again. Connections will be refused on subsequent runs without reboot. Still sorting this out. You will be reminded to reboot if you try to run it a second time._
 -----
 _**Recent Changes:**_
- * DHCP Settings section is now available. You can turn DHCP on/off and manually specify your IP/GW/SubnetMask/DNS/NTP settings.
+ * Made DHCP Settings menu prettier
+ * DHCP Settings menu is now available. You can turn DHCP on/off and manually specify your IP/GW/SubnetMask/DNS/NTP settings.
  * FIX: Connecting to Open/password-less networks was not being saved properly.
  * Now your last used WiFi network is saved to the SD card and we try to reconnect to it on app launch. Press either softkey at Main Menu to Disconnect/Reconnect WiFi.
  * Added Telnet Chat Server
