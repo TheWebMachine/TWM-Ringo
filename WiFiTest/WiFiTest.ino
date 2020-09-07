@@ -1,7 +1,7 @@
 // Example originally coded 5/10/2020 by Frank Prindle.
 // Additional code added by TheWebMachine 6/6/2020 onward (most of which sourced from https://github.com/CircuitMess/)
 
-const String progVer = "1.0.4";
+const String progVer = "1.1.0";
 
 const byte network[] PROGMEM = {16, 12, B00011111, B10000000, B00100000, B01000000, B01000000, B00100000, B10000000, B00010000, B00011111, B10000000, B00100000, B01000000, B01000000, B00100000, B00001111, B00000000, B00010000, B10000000, B00000000, B00000000, B00000110, B00000000, B00001111, B00000000,};
 const byte composeIcon[] PROGMEM = {16, 9, B01111111, B10000000, B10000000, B01000000, B10111111, B01000000, B10000000, B01000000, B10111110, B01000000, B10000000, B01000000, B01001111, B10000000, B01010000, B00000000, B01100000, B00000000,};
@@ -1713,7 +1713,7 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
       break;
     }
 
-    if (mp.buttons.released(BTN_FUN_LEFT) || mp.buttons.released(BTN_FUN_RIGHT)) {
+    if (mp.buttons.released(BTN_FUN_LEFT)/* || mp.buttons.released(BTN_FUN_RIGHT)*/) {
       disconnectWiFi = !disconnectWiFi;
       if (disconnectWiFi) {
         WiFi.scanDelete();
@@ -1722,6 +1722,10 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
         while (!mp.update());
       }
       else reconnectWiFi();
+    }
+
+    if (mp.buttons.released(BTN_FUN_RIGHT)) {
+      while(!currentStatus());
     }
 
     if (mp.buttons.pressed(BTN_UP)) {  //BUTTON UP
@@ -1811,6 +1815,97 @@ bool settingsApp() {
 
   }
   return -1;
+}
+
+bool currentStatus() {
+  while (1) {
+    while(!mp.update());
+    mp.display.fillScreen(TFT_BLACK);
+    if (WiFi.status() == WL_CONNECTED)
+    {
+      currentRSSI = WiFi.RSSI();
+      mp.display.setTextFont(1);
+      mp.display.setTextColor(TFT_GREEN);
+      mp.display.setCursor(0, 115);
+      mp.display.print("Connected:");
+      mp.display.print(connectedToSSID);
+      mp.display.fillRect(139, 109, 19, 18, TFT_LIGHTGREY);
+      int strength = currentRSSI.toInt();
+      //> -50 full
+      // < -50 && > -75 high
+      // < -75 && > -95 low
+      // < -95 nosignal
+      if (strength > -50)
+        mp.display.drawBitmap(140, 110, signalFullIcon, TFT_GREEN, 2);
+      else if (strength <= -50 && strength > -75)
+        mp.display.drawBitmap(140, 110, signalHighIcon, TFT_GREEN, 2);
+      else if (strength <= -75 && strength > -95)
+        mp.display.drawBitmap(140, 110, signalLowIcon, TFT_YELLOW, 2);
+      else if (strength <= -95)
+        mp.display.drawBitmap(140, 110, noSignalIcon, TFT_RED, 2);
+      mp.display.setTextColor(TFT_BLACK);
+      mp.display.setCursor(140, 118);
+      mp.display.print(currentRSSI);
+    }
+    else
+    {
+      mp.display.setTextFont(1);
+      mp.display.setTextColor(TFT_YELLOW);
+      mp.display.setCursor(0, 115);
+      mp.display.print("NOT CONNECTED! (v");
+      mp.display.print(progVer);
+      mp.display.print(")");
+      mp.display.pushSprite(0,0);
+      disconnectWiFi = !disconnectWiFi;
+      reconnectWiFi();
+    }
+    mp.display.setTextColor(TFT_WHITE);
+    ip = WiFi.localIP();
+    subnet = WiFi.subnetMask();
+    gateway = WiFi.gatewayIP();
+    mp.display.setCursor(0, 3);
+    mp.display.setTextFont(2);
+    mp.display.printCenter("Current Status");
+    mp.display.setTextFont(1);
+    mp.display.setCursor(3, 23);
+    mp.display.print("IP:");
+    mp.display.setCursor(36, 23);
+    mp.display.print(ip);
+    mp.display.setCursor(3, 41);
+    mp.display.print("GW:");
+    mp.display.setCursor(36, 41);
+    mp.display.print(gateway);
+    mp.display.setCursor(3, 59);
+    mp.display.print("SNM:");
+    mp.display.setCursor(36, 59);
+    mp.display.print(subnet);
+    if (!useDHCP) {
+      mp.display.setCursor(3, 77);
+      mp.display.print("DNS: ");
+      mp.display.setCursor(36, 77);
+      mp.display.print(configDNS);
+      mp.display.setCursor(3, 95);
+      mp.display.print("DHCP:");
+      mp.display.setCursor(36, 95);
+      mp.display.print("NO");
+    }
+    else {
+      mp.display.setCursor(3, 95);
+      mp.display.print("DHCP:");
+      mp.display.setCursor(36, 95);
+      mp.display.print("YES");
+    }
+    mp.display.pushSprite(0,0);
+    if (mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_A) || mp.buttons.released(BTN_B)) return 1;
+    if (mp.buttons.released(BTN_FUN_LEFT)) {
+      disconnectWiFi = !disconnectWiFi;
+      WiFi.scanDelete();
+      WiFi.disconnect(true); delay(10); // disable WIFI altogether
+      WiFi.mode(WIFI_MODE_NULL); delay(10);
+      while (!mp.update());
+      return 1;
+    }
+  }
 }
 
 
