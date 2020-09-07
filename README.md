@@ -1,7 +1,5 @@
 # TWM-Ringo
------
 ## TheWebMachine's CircuitMess Ringo Repository
------
 ### **DESCRIPTION:** Just a random collection of code for the CircuitMess Ringo (MAKERphone).
 
 **WiFiTest:** Allows you to test your wifi network by way of an NTP test and Telnet Chat Server with plans to expand to include more utilities in the future.
