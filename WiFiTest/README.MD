@@ -54,7 +54,7 @@ _**Latest settings.txt format:**_
  * `TWM-2G|myPassW0rd|0|192.168.1.100|192.168.1.1|255.255.255.0|8.8.8.8|time.nist.gov`
 
 _**NOTES on manually editing settings.txt:**_ 
- * The settings text must be the FIRST line in the file
+ * The settings text must be the FIRST AND ONLY line in the file
  * Pipe `|` chars separate the parameters. So, if you leave settings blank, pipes must remain...I see 7 pipes above; that's what you should have, regardless of how many parameters are filled in! _(the app will fill in empty manual IPs with 0.0.0.0 when saving the file)_
  * A blank Pass is perfectly normal if you are using an open/unsecured WiFi
  * If the DHCP boolean is set to 1, the manual addresses will still be read, but not applied to the connection
