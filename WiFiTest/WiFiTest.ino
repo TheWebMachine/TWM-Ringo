@@ -1,7 +1,7 @@
 // Example originally coded 5/10/2020 by Frank Prindle.
 // Additional code added by TheWebMachine 6/6/2020 onward (most of which sourced from https://github.com/CircuitMess/)
 
-const String progVer = "0.6.0";
+const String progVer = "1.0.1";
 
 const byte network[] PROGMEM = {16, 12, B00011111, B10000000, B00100000, B01000000, B01000000, B00100000, B10000000, B00010000, B00011111, B10000000, B00100000, B01000000, B01000000, B00100000, B00001111, B00000000, B00010000, B10000000, B00000000, B00000000, B00000110, B00000000, B00001111, B00000000,};
 const byte composeIcon[] PROGMEM = {16, 9, B01111111, B10000000, B10000000, B01000000, B10111111, B01000000, B10000000, B01000000, B10111110, B01000000, B10000000, B01000000, B01001111, B10000000, B01010000, B00000000, B01100000, B00000000,};
@@ -1315,6 +1315,13 @@ void setup()
 {
   Serial.begin(115200);
   mp.begin(1);
+  Serial.println();
+  Serial.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+  Serial.print("~~~~~ WiFiTest v");
+  Serial.print(progVer);
+  Serial.println(" starting! ~~~~~");
+  Serial.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+  Serial.println();
   mp.inCall = 0;
   mp.homePopupEnable(1);   // Enable homePopup()
   loadFromSD();
@@ -1392,6 +1399,10 @@ void reconnectWiFi()
         Serial.println(gateway);
         Serial.print("SNM: ");
         Serial.println(subnet);
+        if (!useDHCP) {
+          Serial.print("DNS: ");
+          Serial.println(configDNS);
+        }
         Serial.println();
         return;
       }
@@ -2444,103 +2455,103 @@ void dhcpSettings() {
       case 1: //ip[0]
               mp.display.drawRect(34, 22, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(33, 21, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
-              mp.display.setCursor(0, 112);
+              mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 2: //ip[1]
               mp.display.drawRect(64, 22, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(63, 21, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
-              mp.display.setCursor(0, 112);
+              mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 3: //ip[2]
               mp.display.drawRect(94, 22, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(93, 21, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
-              mp.display.setCursor(0, 112);
+              mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 4: //ip[3]
               mp.display.drawRect(124, 22, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(123, 21, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
-              mp.display.setCursor(0, 112);
+              mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 5: //gw[0]
               mp.display.drawRect(34, 40, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(33, 39, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
-              mp.display.setCursor(0, 112);
+              mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 6: //gw[1]
               mp.display.drawRect(64, 40, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(63, 39, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
-              mp.display.setCursor(0, 112);
+              mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 7: //gw[2]
               mp.display.drawRect(94, 40, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(93, 39, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
-              mp.display.setCursor(0, 112);
+              mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 8: //gw[3]
               mp.display.drawRect(124, 40, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(123, 39, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
-              mp.display.setCursor(0, 112);
+              mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 9: //snm[0]
               mp.display.drawRect(34, 58, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(33, 57, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
-              mp.display.setCursor(0, 112);
+              mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 10: //snm[1]
               mp.display.drawRect(64, 58, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(63, 57, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
-              mp.display.setCursor(0, 112);
+              mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 11: //snm[2]
               mp.display.drawRect(94, 58, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(93, 57, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
-              mp.display.setCursor(0, 112);
+              mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 12: //snm[3]
               mp.display.drawRect(124, 58, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(123, 57, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
-              mp.display.setCursor(0, 112);
+              mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 13: //dns[0]
               mp.display.drawRect(34, 76, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(33, 75, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
-              mp.display.setCursor(0, 112);
+              mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 14: //dns[1]
               mp.display.drawRect(64, 76, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(63, 75, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
-              mp.display.setCursor(0, 112);
+              mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 15: //dns[2]
               mp.display.drawRect(94, 76, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(93, 75, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
-              mp.display.setCursor(0, 112);
+              mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 16: //dns[3]
               mp.display.drawRect(124, 76, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(123, 75, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
-              mp.display.setCursor(0, 112);
+              mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 17: //ntp
               mp.display.drawRect(34, 94, 125, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(33, 93, 127, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
-              mp.display.setCursor(0, 112);
+              mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               mp.display.setCursor(133, 112);
               mp.display.print("Help");
@@ -2876,19 +2887,20 @@ void ntpTest()
                                   };
     WiFiUDP udp;
     udp.begin(localPort);
-    statusline("Trying To Resolve Server", true);
-    Serial.println("Trying To Resolve Server");
+    statusline("Trying to resolve Server", true);
+    Serial.print("Trying to connect to ");
+    Serial.println(configNTP);
 
     udp.beginPacket(configNTP.c_str(), 123); // NTP requests are to port 123
 
-    statusline("Trying To Resolve Server", false);
+    statusline("Trying to resolve Server", false);
     udp.write(outPacket, sizeof(outPacket));
     udp.endPacket();
     int count = 100;
+    Serial.println("NTP waiting for Response");
+    statusline("NTP waiting for Response", true);
     while (udp.parsePacket() < sizeof(inPacket) && --count)
     {
-      statusline("NTP Waiting For Response", true);
-      Serial.println("NTP Waiting For Response");
       delay(20);
 
       mp.buttons.update();
@@ -2908,7 +2920,7 @@ void ntpTest()
       }
 
     }
-    statusline("NTP Waiting For Response", false);
+    statusline("NTP waiting for Response", false);
     if (count)
     {
       // NTP request honored - time is in packet
@@ -2934,7 +2946,7 @@ void ntpTest()
         if (sse == secsSinceEpoch) mp.display.setTextColor(TFT_YELLOW);
         else                      mp.display.setTextColor(TFT_GREEN);
         mp.display.fillScreen(TFT_BLACK);
-        mp.display.setCursor(20, 8);
+        mp.display.setCursor(5, 8);
         mp.display.print("FROM: ");
         mp.display.print(configNTP);
         mp.display.setTextColor(TFT_GREEN);

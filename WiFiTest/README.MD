@@ -4,7 +4,7 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 ![Screenshot](WiFiTest_screenshot_0.4.0.jpg) ![Screenshot](WiFiTest_DHCPSettings_screenshot.jpg)
 ![Screenshot](WiFiTest_ChatServer_screenshot_0.4.1.jpg)
 
-**v1.0.0 - WeCanHazFancyMenus!**
+**v1.0.1 - WeCanHazFancyMenus!**
 
 When the app starts, you're shown the **Main Menu**:
  * **Choose Network** - _Always start here_. You'll need to connect to your Wifi network before you do anything else. _**NEW! When you successfully connect to a network, these settings will be saved on the SD card and loaded on app start to allow for automatic reconnection to your last used network.**_ While at Main Menu, pressing either `Softkey` will disconnect/reconnect the WiFi network. **NOTE: WiFi Password is saved to SD card in plaintext!**
