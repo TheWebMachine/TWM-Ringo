@@ -1,7 +1,8 @@
 First off, huge thanks to the CircuitMess team and shoutout to Frank Prindle (https://community.circuitmess.com/u/frankprindle) for the
 first draft of this code. It is definitely a WIP, but the hope is to expand it into a full WiFi utility for Ringo.
 
-![Screenshot](WiFiTest_screenshot_0.4.0.jpg) ![Screenshot](WiFiTest_ChatServer_screenshot_0.4.1.jpg)
+![Screenshot](WiFiTest_screenshot_0.4.0.jpg) ![Screenshot](WiFiTest_DHCPSettings_screenshot.jpg)
+![Screenshot](WiFiTest_ChatServer_screenshot_0.4.1.jpg)
 
 **v1.0.0 - WeCanHazFancyMenus!**
 
