@@ -31,15 +31,19 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
  * Press `B` at any time to Cancel and revert to your previously saved settings
 -----
 **NTP Test Instructions:**
- * This app simply checks in with an NTP server via UDP every 10 seconds. This will allow you to test the relative stability of your wifi connection. Repeated failures to contact the NTP server could indicate a poor connection quality..
+ * This app simply checks in with an NTP server via UDP every 10 seconds
+ * This will allow you to test the relative stability of your wifi connection. Repeated failures to contact the NTP server could indicate a poor connection quality
+ * You can specify a custom NTP server via the DHCP Settings menu
  * Press `A` to select a new WiFi Network
  * Press `B` to return to the Main Menu
 -----
 **Chat Server Instructions:**
- * This app will show you the current IP of the Ringo (and a reminder that telnet is port 23). Use a telnet client like PuTTY to connect. 
- * To see it actually work, you need more than one client connected at a time, as messages will not be repeated on the originating client.
+ * This app will show you the current IP of the Ringo (and a reminder that telnet is port 23)
+ * Use a telnet client like PuTTY to connect
+ * To see it actually work, you need more than one client connected at a time, as messages will not be repeated on the originating client
  * Press `B` to return to the Main Menu
  * _KNOWN BUG: After you have run the Chat Server once, you'll have to reboot before it can be ran again. Connections will be refused on subsequent runs without reboot. Still sorting this out. You will be reminded to reboot if you try to run it a second time._
+-----
 -----
 _**Recent Changes:**_
  * Added Current Status screen (press `Right Softkey` at Main Menu)
@@ -50,11 +54,13 @@ _**Recent Changes:**_
  * Added a live signal strength meter to the bottom status line
  * Added back homePopup() when you press the HOME button (fixed the restart issue)
  * mp.inCall (ability to sleep/save power) is now dynamically enabled/disabled as it makes sense to (WILL sleep at general menus, will NOT sleep during a test or while connecting to WiFi)
-
+-----
 -----
 _**Future Plans:**_
- * _More tests, like Ping, Tracenet, etc...and perhaps some more creative tests as they are thought of_
-  
+ * _More basic tests, like Ping, Tracenet, etc_
+ * _A Captive Portal AP mode_
+ * _Advanced Web Server hosting from SD card_
+-----
 -----
 _**Latest settings.txt format:**_
  * `[SSID]|[Pass(plaintext)]|[DHCP(bool)]|[DeviceIP]|[GatewayIP]|[SubnetMask]|[DNSserver]|[NTPserver]`
