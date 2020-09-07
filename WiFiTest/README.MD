@@ -4,16 +4,22 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 ![Screenshot](WiFiTest_screenshot_0.4.0.jpg) ![Screenshot](WiFiTest_DHCPSettings_screenshot.jpg)
 ![Screenshot](WiFiTest_ChatServer_screenshot_0.4.1.jpg)
 
-**v1.0.4 - WeCanHazFancyMenus!**
+**v1.1.0 - Everyone gets a Status Screen!**
 
-When the app starts, you're shown the **Main Menu**:
- * **Choose Network** - _Always start here_. You'll need to connect to your Wifi network before you do anything else. _**NEW! When you successfully connect to a network, these settings will be saved on the SD card and loaded on app start to allow for automatic reconnection to your last used network.**_ While at Main Menu, pressing either `Softkey` will disconnect/reconnect the WiFi network. **NOTE: WiFi Password is saved to SD card in plaintext!**
+**Main Menu:**
+ * **Choose Network** - You'll need to connect to your Wifi network before you do anything else. Your network settings are saved to the SD card. 
+   * **NOTE: WiFi Password is saved to SD card in plaintext!**
+   * **REMEMBER: Ringo only supports 2GHz WiFi Networks!**
  * **DHCP Settings** - This will allow you to specify network settings like IP, DNS, NTP server, etc
  * **NTP Test** - The first test added to this app, originally written by Frank Prindle.
- * **Chat Server** - A Telnet chat server for multiple clients to connect to. PuTTY works well with this (duplicate multiple sessions to see it in action). Messages sent by one client are sent to all other connected clients.
- 
-If you attempt to access NTP Test or Chat Server without being connected to Wifi, the app will first attempt to connect to your saved network. If that fails, you will receive a prompt telling you to connect first. Pressing the B button from within a test or settings menus will take you back to the Main Menu. Pressing HOME will bring up the homePopup() menu, allowing you to adjust settings or exit the program and return to the Ringo Loader.
-
+ * **Chat Server** - A Telnet chat server for multiple clients to connect to. 
+   * PuTTY works well with this (duplicate multiple sessions to see it in action). 
+   * Messages sent by one client are sent to all other connected clients, but _NOT_ to the originating client.
+ * `Left Softkey` will disconnect/reconnect the WiFi network
+ * `Right Softkey` will show Current Status screen with network information
+ * If you attempt to access NTP Test or Chat Server without being connected to Wifi, the app will first attempt to connect to your saved network. If that fails, you will receive a prompt telling you to connect first. 
+ * Pressing the `B` button from within a test or settings menus will take you back to the Main Menu. 
+ * Pressing `HOME` will bring up the homePopup() menu, allowing you to adjust settings or exit the program and return to the Ringo Loader.
 -----
 **DHCP Settings Menu:**
  * `Joystick` will move between the fields; including `left-right` to move between octets, with exception to the DHCP option where `left-right` toggles the option
@@ -34,10 +40,10 @@ If you attempt to access NTP Test or Chat Server without being connected to Wifi
  * _KNOWN BUG: After you have run the Chat Server once, you'll have to reboot before it can be ran again. Connections will be refused on subsequent runs without reboot. Still sorting this out. You will be reminded to reboot if you try to run it a second time._
 -----
 _**Recent Changes:**_
- * Made DHCP Settings menu prettier
+ * Added Current Status screen (press `Right Softkey` at Main Menu)
  * DHCP Settings menu is now available. You can turn DHCP on/off and manually specify your IP/GW/SubnetMask/DNS/NTP settings.
  * FIX: Connecting to Open/password-less networks was not being saved properly.
- * Now your last used WiFi network is saved to the SD card and we try to reconnect to it on app launch. Press either softkey at Main Menu to Disconnect/Reconnect WiFi.
+ * We now save WiFi network settings to SD/WiFiTest/settings.txt
  * Added Telnet Chat Server
  * Added a live signal strength meter to the bottom status line
  * Added back homePopup() when you press the HOME button (fixed the restart issue)
