@@ -17,7 +17,7 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
  * **Chat Server** - A Telnet chat server for multiple clients to connect to. 
    * PuTTY works well with this (duplicate multiple sessions to see it in action). 
    * Messages sent by one client are sent to all other connected clients, but _NOT_ to the originating client.
- * `Left Softkey` will disconnect/reconnect the WiFi network
+ * `Left Softkey` will toggle the WiFi network connection on/off
  * `Right Softkey` will show Current Status screen with network information
  * If you attempt to access NTP Test or Chat Server without being connected to Wifi, the app will first attempt to connect to your saved network. If that fails, you will receive a prompt telling you to connect first. 
  * Pressing the `B` button from within a test or settings menus will take you back to the Main Menu. 
@@ -32,7 +32,7 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 -----
 **NTP Test Instructions:**
  * This app simply checks in with an NTP server via UDP every 10 seconds
- * This will allow you to test the relative stability of your wifi connection. Repeated failures to contact the NTP server could indicate a poor connection quality
+ * This will allow you to test the relative stability of your wifi connection. Repeated failures to contact the NTP server could indicate a poor connection or network quality
  * You can specify a custom NTP server via the DHCP Settings menu
  * Press `A` to select a new WiFi Network
  * Press `B` to return to the Main Menu
