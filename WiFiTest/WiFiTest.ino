@@ -1,7 +1,7 @@
 // Example originally coded 5/10/2020 by Frank Prindle.
 // Additional code added by TheWebMachine 6/6/2020 onward (most of which sourced from https://github.com/CircuitMess/)
 
-const String progVer = "1.0.1";
+const String progVer = "1.0.2";
 
 const byte network[] PROGMEM = {16, 12, B00011111, B10000000, B00100000, B01000000, B01000000, B00100000, B10000000, B00010000, B00011111, B10000000, B00100000, B01000000, B01000000, B00100000, B00001111, B00000000, B00010000, B10000000, B00000000, B00000000, B00000110, B00000000, B00001111, B00000000,};
 const byte composeIcon[] PROGMEM = {16, 9, B01111111, B10000000, B10000000, B01000000, B10111111, B01000000, B10000000, B01000000, B10111110, B01000000, B10000000, B01000000, B01001111, B10000000, B01010000, B00000000, B01100000, B00000000,};
@@ -2344,7 +2344,7 @@ void dhcpSettings() {
       blinkMillis = millis();
       blinkState = !blinkState;
     }
-    mp.display.fillScreen(TFT_DARKGREY);
+    mp.display.fillScreen(TFT_BLACK);
     mp.display.setTextSize(1);
     mp.display.setTextFont(2);
     mp.display.setTextColor(TFT_WHITE);
