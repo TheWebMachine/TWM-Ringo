@@ -1,7 +1,7 @@
 // Example originally coded 5/10/2020 by Frank Prindle.
 // Additional code added by TheWebMachine 6/6/2020 onward (most of which sourced from https://github.com/CircuitMess/)
 
-const String progVer = "1.0.3";
+const String progVer = "1.0.4";
 
 const byte network[] PROGMEM = {16, 12, B00011111, B10000000, B00100000, B01000000, B01000000, B00100000, B10000000, B00010000, B00011111, B10000000, B00100000, B01000000, B01000000, B00100000, B00001111, B00000000, B00010000, B10000000, B00000000, B00000000, B00000110, B00000000, B00001111, B00000000,};
 const byte composeIcon[] PROGMEM = {16, 9, B01111111, B10000000, B10000000, B01000000, B10111111, B01000000, B10000000, B01000000, B10111110, B01000000, B10000000, B01000000, B01001111, B10000000, B01010000, B00000000, B01100000, B00000000,};
@@ -2353,7 +2353,8 @@ void dhcpSettings() {
     mp.display.print("Use DHCP?");
     mp.display.setCursor(100,3);
     mp.display.print("Yes  No");
-    
+
+    if (useDHCP) mp.display.setTextColor(TFT_DARKGREY);
     mp.display.setCursor(3, 23);
     mp.display.print("IP:");
     mp.display.setCursor(36, 23);
@@ -2421,7 +2422,8 @@ void dhcpSettings() {
     mp.display.print(".");
     mp.display.setCursor(126, 77);
     mp.display.print(configDNS[3]);
-    
+
+    mp.display.setTextColor(TFT_WHITE);
     mp.display.setCursor(3, 95);
     mp.display.print("NTP:");
     mp.display.setCursor(36, 95);
