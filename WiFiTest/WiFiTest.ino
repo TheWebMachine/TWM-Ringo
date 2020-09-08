@@ -1,8 +1,18 @@
-// Example originally coded 5/10/2020 by Frank Prindle.
-// Additional code added by TheWebMachine 6/6/2020 onward (most of which sourced from https://github.com/CircuitMess/)
+/* ------------------------------------------------------------------
+ * ------------------------     WiFiTest     ------------------------
+ * ------------------------ by TheWebMachine ------------------------
+ * ------------------------------------------------------------------
+ * 
+ * NTP Example originally coded 5/10/2020 by Frank Prindle.
+ * A lot of code was sourced from https://github.com/CircuitMess/
+ * and the Arduino Tutorials and Examples. All MIT licensed.
+*/
+const String progVer = "1.1.1";
 
-const String progVer = "1.1.0";
-
+// ----------------------------------------
+// -----       PROGRAM CONSTANTS      -----
+// ----- (skip to line 1300 for code) -----
+// ----------------------------------------
 const byte network[] PROGMEM = {16, 12, B00011111, B10000000, B00100000, B01000000, B01000000, B00100000, B10000000, B00010000, B00011111, B10000000, B00100000, B01000000, B01000000, B00100000, B00001111, B00000000, B00010000, B10000000, B00000000, B00000000, B00000110, B00000000, B00001111, B00000000,};
 const byte composeIcon[] PROGMEM = {16, 9, B01111111, B10000000, B10000000, B01000000, B10111111, B01000000, B10000000, B01000000, B10111110, B01000000, B10000000, B01000000, B01001111, B10000000, B01010000, B00000000, B01100000, B00000000,};
 const byte timeIcon[] PROGMEM = {16, 12, B00011111, B10000000, B00100000, B01000000, B01000100, B00100000, B10000100, B00010000, B10000100, B00010000, B10000100, B00010000, B10000111, B10010000, B10000000, B00010000, B10000000, B00010000, B01000000, B00100000, B00100000, B01000000, B00011111, B10000000,};
@@ -1291,6 +1301,8 @@ const unsigned short TextHelperPopup[0x5000] PROGMEM ={
 };
 
 
+
+
 #include <MAKERphone.h>
 MAKERphone mp;
 bool helpPop;
@@ -1327,6 +1339,21 @@ void setup()
   loadFromSD();
 }
 
+void loop()
+{
+  while (1)
+  {
+    reconnectWiFi();
+    showMainMenu();
+  }
+}
+
+
+
+// ----------------------------
+// ----- COMMON FUNCTIONS -----
+// ----------------------------
+
 // Display (on==true) or erase (on==false) transient status line near bottom of display
 void statusline(char *msg, bool on)
 {
@@ -1337,6 +1364,7 @@ void statusline(char *msg, bool on)
 
 }
 
+// Reconnect to WiFi network (if enabled) using saved settings
 void reconnectWiFi()
 {
   if (disconnectWiFi) return;
@@ -1410,6 +1438,7 @@ void reconnectWiFi()
   }
 }
 
+// Write all settings to SD/WiFiTest/settings.txt
 void writeToSD()
 {
   Serial.println("Attempting to write /WiFiTest/settings.txt to SDcard...");
@@ -1450,6 +1479,7 @@ void writeToSD()
   SettingsFile.close();
 }
 
+// Read all settings to SD/WiFiTest/settings.txt
 void loadFromSD()
 {
   String setting;
@@ -1566,31 +1596,147 @@ void loadFromSD()
   SettingsFile.close();
 }
 
-void loop()
-{
-  while (1)
-  {
-    reconnectWiFi();
-    settingsApp();
+// Current Status screen (Right Softkey from Main Menu)
+bool currentStatus() {
+  while (1) {
+    while(!mp.update());
+    mp.display.fillScreen(TFT_BLACK);
+    if (WiFi.status() == WL_CONNECTED)
+    {
+      currentRSSI = WiFi.RSSI();
+      mp.display.setTextFont(1);
+      mp.display.setTextColor(TFT_GREEN);
+      mp.display.setCursor(0, 115);
+      mp.display.print("Connected:");
+      mp.display.print(connectedToSSID);
+      mp.display.fillRect(139, 109, 19, 18, TFT_LIGHTGREY);
+      int strength = currentRSSI.toInt();
+      //> -50 full
+      // < -50 && > -75 high
+      // < -75 && > -95 low
+      // < -95 nosignal
+      if (strength > -50)
+        mp.display.drawBitmap(140, 110, signalFullIcon, TFT_GREEN, 2);
+      else if (strength <= -50 && strength > -75)
+        mp.display.drawBitmap(140, 110, signalHighIcon, TFT_GREEN, 2);
+      else if (strength <= -75 && strength > -95)
+        mp.display.drawBitmap(140, 110, signalLowIcon, TFT_YELLOW, 2);
+      else if (strength <= -95)
+        mp.display.drawBitmap(140, 110, noSignalIcon, TFT_RED, 2);
+      mp.display.setTextColor(TFT_BLACK);
+      mp.display.setCursor(140, 118);
+      mp.display.print(currentRSSI);
+    }
+    else
+    {
+      mp.display.setTextFont(1);
+      mp.display.setTextColor(TFT_YELLOW);
+      mp.display.setCursor(0, 115);
+      mp.display.print("NOT CONNECTED! (v");
+      mp.display.print(progVer);
+      mp.display.print(")");
+      mp.display.pushSprite(0,0);
+      disconnectWiFi = !disconnectWiFi;
+      reconnectWiFi();
+    }
+    mp.display.setTextColor(TFT_WHITE);
+    ip = WiFi.localIP();
+    subnet = WiFi.subnetMask();
+    gateway = WiFi.gatewayIP();
+    mp.display.setCursor(0, 3);
+    mp.display.setTextFont(2);
+    mp.display.setTextColor(TFT_BLUE);
+    mp.display.printCenter("Current Status");
+    mp.display.setTextColor(TFT_WHITE);
+    mp.display.setTextFont(1);
+    mp.display.setCursor(3, 23);
+    mp.display.print("IP:");
+    mp.display.setCursor(36, 23);
+    mp.display.print(ip);
+    mp.display.setCursor(3, 41);
+    mp.display.print("GW:");
+    mp.display.setCursor(36, 41);
+    mp.display.print(gateway);
+    mp.display.setCursor(3, 59);
+    mp.display.print("SNM:");
+    mp.display.setCursor(36, 59);
+    mp.display.print(subnet);
+    if (!useDHCP) {
+      mp.display.setCursor(3, 77);
+      mp.display.print("DNS: ");
+      mp.display.setCursor(36, 77);
+      mp.display.print(configDNS);
+      mp.display.setCursor(3, 95);
+      mp.display.print("DHCP:");
+      mp.display.setCursor(36, 95);
+      mp.display.print("NO");
+    }
+    else {
+      mp.display.setCursor(3, 95);
+      mp.display.print("DHCP:");
+      mp.display.setCursor(36, 95);
+      mp.display.print("YES");
+    }
+    mp.display.pushSprite(0,0);
+    if (mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_A) || mp.buttons.released(BTN_B)) return 1;
+    if (mp.buttons.released(BTN_FUN_LEFT)) {
+      disconnectWiFi = !disconnectWiFi;
+      WiFi.scanDelete();
+      WiFi.disconnect(true); delay(10); // disable WIFI altogether
+      WiFi.mode(WIFI_MODE_NULL); delay(10);
+      while (!mp.update());
+      return 1;
+    }
   }
 }
+
+
 
 // ---------------------
 // ----- MAIN MENU -----
 // ---------------------
-// Borrowed from settingsApp
+// Borrowed from Ringo firmware settingsApp
 boolean colorSetup = 0;
-String settingsItems[4] PROGMEM = {
+int32_t mainMenuYOffset;
+String mainMenuItems[4] PROGMEM = {
   "Choose Network",
   "DHCP Settings",
   "NTP Test",
   "Chat Server"
 };
 
-void settingsMenuDrawBox(String title, uint8_t i, int32_t y) {
+bool showMainMenu() {
+  int8_t input = 0;
+  while (1)
+  {
+    mp.inCall = 0;
+    while (!mp.update());
+    input = mainMenu(mainMenuItems, 4, input);
+    if (input == -1) //BUTTON BACK
+      break;
+    if (input == 0)
+      wifiConnect();
+    if (input == 1) {
+      dhcpSettings();
+    }
+    if (input == 2)
+      ntpTest();
+    if (input == 3)
+      wifiChat();
+    //if (input == 4)
+    //securityMenu();
+    //if (input == 5)
+    //if(updateMenu())
+    //return true;
+
+  }
+  return -1;
+}
+
+void mainMenuDrawBox(String title, uint8_t i, int32_t y) {
   uint8_t scale = 2;
   uint8_t boxHeight = 20;
-  y += i * boxHeight + settingsMenuYOffset;
+  y += i * boxHeight + mainMenuYOffset;
   if (y < 0 || y > mp.display.width()) {
     return;
   }
@@ -1669,13 +1815,15 @@ void settingsMenuDrawBox(String title, uint8_t i, int32_t y) {
   mp.display.setTextColor(TFT_WHITE);
   mp.display.setFreeFont(TT1);
 }
-void settingsMenuDrawCursor(uint8_t i, int32_t y, bool pressed) {
+
+void mainMenuDrawCursor(uint8_t i, int32_t y, bool pressed) {
   uint8_t boxHeight = 20;
-  y += i * boxHeight + settingsMenuYOffset;
+  y += i * boxHeight + mainMenuYOffset;
   mp.display.drawRect(0, y - 1, mp.display.width() - 1, boxHeight + 2, TFT_RED);
   mp.display.drawRect(1, y, mp.display.width() - 3, boxHeight, TFT_RED);
 }
-int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
+
+int8_t mainMenu(String* title, uint8_t length, uint8_t _cursor) {
   bool pressed = 0;
   uint8_t cursor = _cursor;
   int32_t cameraY = 0;
@@ -1697,17 +1845,17 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
       blinkState = !blinkState;
     }
     for (uint8_t i = 0; i < length; i++) {
-      settingsMenuDrawBox(title[i], i, cameraY_actual);
+      mainMenuDrawBox(title[i], i, cameraY_actual);
     }
     if (blinkState)
-      settingsMenuDrawCursor(cursor, cameraY_actual, pressed);
+      mainMenuDrawCursor(cursor, cameraY_actual, pressed);
 
     if (mp.buttons.timeHeld(BTN_DOWN) == 0 && mp.buttons.timeHeld(BTN_UP) == 0)
       pressed = 0;
 
     if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
-      mp.osc->note(75, 0.05);
-      mp.osc->play();
+      //mp.osc->note(75, 0.05);
+      //mp.osc->play();
 
       while (!mp.update()); // Exit when pressed
       break;
@@ -1731,8 +1879,8 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
     if (mp.buttons.pressed(BTN_UP)) {  //BUTTON UP
       blinkState = 1;
       blinkMillis = millis();
-      mp.osc->note(75, 0.05);
-      mp.osc->play();
+      //mp.osc->note(75, 0.05);
+      //mp.osc->play();
       if (cursor == 0) {
         cursor = length - 1;
         if (length > 6) {
@@ -1741,7 +1889,7 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
       }
       else {
         cursor--;
-        if (cursor > 0 && (cursor * boxHeight + cameraY + settingsMenuYOffset) < boxHeight) {
+        if (cursor > 0 && (cursor * boxHeight + cameraY + mainMenuYOffset) < boxHeight) {
           cameraY += 15;
         }
       }
@@ -1751,10 +1899,10 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
     if (mp.buttons.pressed(BTN_DOWN)) { //BUTTON DOWN
       blinkState = 1;
       blinkMillis = millis();
-      mp.osc->note(75, 0.05);
-      mp.osc->play();
+      //mp.osc->note(75, 0.05);
+      //mp.osc->play();
       cursor++;
-      if ((cursor * boxHeight + cameraY + settingsMenuYOffset) > 128) {
+      if ((cursor * boxHeight + cameraY + mainMenuYOffset) > 128) {
         cameraY -= boxHeight;
       }
       if (cursor >= length) {
@@ -1775,137 +1923,6 @@ int8_t settingsMenu(String* title, uint8_t length, uint8_t _cursor) {
 
   return cursor;
 
-}
-
-
-bool settingsApp() {
-  int8_t input = 0;
-  while (1)
-  {
-    mp.inCall = 0;
-    while (!mp.update());
-    input = settingsMenu(settingsItems, 4, input);
-    if (input == -1) //BUTTON BACK
-      break;
-    if (input == 0)
-      wifiConnect();
-    if (input == 1) {
-    /*mp.display.setTextColor(TFT_BLACK);
-      mp.display.setTextSize(1);
-      mp.display.setTextFont(2);
-      mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
-      mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
-      mp.display.fillRect(5, 50, 150, 26, 0xFD29);
-      mp.display.setCursor(47, 54);
-      mp.display.printCenter("Not yet implemented!");
-      Serial.println("Not yet implemented!");
-      while (!mp.update());
-      delay(2000);   */
-      dhcpSettings();
-    }
-    if (input == 2)
-      ntpTest();
-    if (input == 3)
-      wifiChat();
-    //if (input == 4)
-    //securityMenu();
-    //if (input == 5)
-    //if(updateMenu())
-    //return true;
-
-  }
-  return -1;
-}
-
-bool currentStatus() {
-  while (1) {
-    while(!mp.update());
-    mp.display.fillScreen(TFT_BLACK);
-    if (WiFi.status() == WL_CONNECTED)
-    {
-      currentRSSI = WiFi.RSSI();
-      mp.display.setTextFont(1);
-      mp.display.setTextColor(TFT_GREEN);
-      mp.display.setCursor(0, 115);
-      mp.display.print("Connected:");
-      mp.display.print(connectedToSSID);
-      mp.display.fillRect(139, 109, 19, 18, TFT_LIGHTGREY);
-      int strength = currentRSSI.toInt();
-      //> -50 full
-      // < -50 && > -75 high
-      // < -75 && > -95 low
-      // < -95 nosignal
-      if (strength > -50)
-        mp.display.drawBitmap(140, 110, signalFullIcon, TFT_GREEN, 2);
-      else if (strength <= -50 && strength > -75)
-        mp.display.drawBitmap(140, 110, signalHighIcon, TFT_GREEN, 2);
-      else if (strength <= -75 && strength > -95)
-        mp.display.drawBitmap(140, 110, signalLowIcon, TFT_YELLOW, 2);
-      else if (strength <= -95)
-        mp.display.drawBitmap(140, 110, noSignalIcon, TFT_RED, 2);
-      mp.display.setTextColor(TFT_BLACK);
-      mp.display.setCursor(140, 118);
-      mp.display.print(currentRSSI);
-    }
-    else
-    {
-      mp.display.setTextFont(1);
-      mp.display.setTextColor(TFT_YELLOW);
-      mp.display.setCursor(0, 115);
-      mp.display.print("NOT CONNECTED! (v");
-      mp.display.print(progVer);
-      mp.display.print(")");
-      mp.display.pushSprite(0,0);
-      disconnectWiFi = !disconnectWiFi;
-      reconnectWiFi();
-    }
-    mp.display.setTextColor(TFT_WHITE);
-    ip = WiFi.localIP();
-    subnet = WiFi.subnetMask();
-    gateway = WiFi.gatewayIP();
-    mp.display.setCursor(0, 3);
-    mp.display.setTextFont(2);
-    mp.display.printCenter("Current Status");
-    mp.display.setTextFont(1);
-    mp.display.setCursor(3, 23);
-    mp.display.print("IP:");
-    mp.display.setCursor(36, 23);
-    mp.display.print(ip);
-    mp.display.setCursor(3, 41);
-    mp.display.print("GW:");
-    mp.display.setCursor(36, 41);
-    mp.display.print(gateway);
-    mp.display.setCursor(3, 59);
-    mp.display.print("SNM:");
-    mp.display.setCursor(36, 59);
-    mp.display.print(subnet);
-    if (!useDHCP) {
-      mp.display.setCursor(3, 77);
-      mp.display.print("DNS: ");
-      mp.display.setCursor(36, 77);
-      mp.display.print(configDNS);
-      mp.display.setCursor(3, 95);
-      mp.display.print("DHCP:");
-      mp.display.setCursor(36, 95);
-      mp.display.print("NO");
-    }
-    else {
-      mp.display.setCursor(3, 95);
-      mp.display.print("DHCP:");
-      mp.display.setCursor(36, 95);
-      mp.display.print("YES");
-    }
-    mp.display.pushSprite(0,0);
-    if (mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_A) || mp.buttons.released(BTN_B)) return 1;
-    if (mp.buttons.released(BTN_FUN_LEFT)) {
-      disconnectWiFi = !disconnectWiFi;
-      WiFi.scanDelete();
-      WiFi.disconnect(true); delay(10); // disable WIFI altogether
-      WiFi.mode(WIFI_MODE_NULL); delay(10);
-      while (!mp.update());
-      return 1;
-    }
-  }
 }
 
 
@@ -2925,6 +2942,7 @@ void dhcpSettings() {
 }
 
 
+
 // --------------------
 // ----- NTP TEST -----
 // --------------------
@@ -3016,6 +3034,8 @@ void ntpTest()
         udp.stop();
         return;
       }
+      // Press Right Softkey for Current Network Status
+      if (mp.buttons.released(BTN_FUN_RIGHT)) while(!currentStatus());
 
     }
     statusline("NTP waiting for Response", false);
@@ -3089,6 +3109,8 @@ void ntpTest()
           udp.stop();
           return;
         }
+        // Press Right Softkey for Current Network Status
+        if (mp.buttons.released(BTN_FUN_RIGHT)) while(!currentStatus());
 
       }
     }
