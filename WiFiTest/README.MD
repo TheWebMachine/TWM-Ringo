@@ -34,6 +34,7 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
  * This app simply checks in with an NTP server via UDP every 10 seconds
  * This will allow you to test the relative stability of your wifi connection. Repeated failures to contact the NTP server could indicate a poor connection or network quality
  * You can specify a custom NTP server via the DHCP Settings menu
+ * Press `Right Softkey` to show Current Status screen with network information
  * Press `A` to select a new WiFi Network
  * Press `B` to return to the Main Menu
 -----
