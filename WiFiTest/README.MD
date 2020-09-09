@@ -6,7 +6,7 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 ![Screenshot](WiFiTest_screenshot_0.4.0.jpg) ![Screenshot](WiFiTest_DHCPSettings_screenshot.jpg)
 ![Screenshot](WiFiTest_ChatServer_screenshot_0.4.1.jpg)
 
-## **v1.1.1 - Everyone gets a Status Screen!**
+## **v1.1.2 - Everyone gets a Status Screen!**
 
 **Main Menu:**
  * **Choose Network** - You'll need to connect to your Wifi network before you do anything else. Your network settings are saved to the SD card. 
@@ -47,6 +47,7 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 -----
 -----
 _**Recent Changes:**_
+ * FIX: DHCP Settings page > NTP field was missing long text scrolling
  * Cleaned up and rearranged some code; prep for additional menus
  * Added Current Status screen (press `Right Softkey` at Main Menu or during NTP Test)
  * DHCP Settings menu is now available. You can turn DHCP on/off and manually specify your IP/GW/SubnetMask/DNS/NTP settings.
