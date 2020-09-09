@@ -7,7 +7,7 @@
  * A lot of code was sourced from https://github.com/CircuitMess/
  * and the Arduino Tutorials and Examples. All MIT licensed.
 */
-const String progVer = "1.1.1";
+const String progVer = "1.1.2";
 
 // ----------------------------------------
 // -----       PROGRAM CONSTANTS      -----
@@ -2539,7 +2539,7 @@ void dhcpSettings() {
     mp.display.setCursor(3, 95);
     mp.display.print("NTP:");
     mp.display.setCursor(36, 95);
-    mp.display.print(configNTP);
+    
 
   // Display our cursor
     if (!useDHCP && cursor != 0)
@@ -2565,110 +2565,158 @@ void dhcpSettings() {
                 mp.display.drawRect(94, 2, 33, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
                 mp.display.drawRect(93, 1, 35, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
               }
+              mp.display.setCursor(36, 95);
+              mp.display.print(configNTP);
               break;
       case 1: //ip[0]
+              mp.display.setCursor(36, 95);
+              mp.display.print(configNTP);
               mp.display.drawRect(34, 22, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(33, 21, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 2: //ip[1]
+              mp.display.setCursor(36, 95);
+              mp.display.print(configNTP);
               mp.display.drawRect(64, 22, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(63, 21, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 3: //ip[2]
+              mp.display.setCursor(36, 95);
+              mp.display.print(configNTP);
               mp.display.drawRect(94, 22, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(93, 21, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 4: //ip[3]
+              mp.display.setCursor(36, 95);
+              mp.display.print(configNTP);
               mp.display.drawRect(124, 22, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(123, 21, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 5: //gw[0]
+              mp.display.setCursor(36, 95);
+              mp.display.print(configNTP);
               mp.display.drawRect(34, 40, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(33, 39, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 6: //gw[1]
+              mp.display.setCursor(36, 95);
+              mp.display.print(configNTP);
               mp.display.drawRect(64, 40, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(63, 39, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 7: //gw[2]
+              mp.display.setCursor(36, 95);
+              mp.display.print(configNTP);
               mp.display.drawRect(94, 40, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(93, 39, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 8: //gw[3]
+              mp.display.setCursor(36, 95);
+              mp.display.print(configNTP);
               mp.display.drawRect(124, 40, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(123, 39, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 9: //snm[0]
+              mp.display.setCursor(36, 95);
+              mp.display.print(configNTP);
               mp.display.drawRect(34, 58, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(33, 57, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 10: //snm[1]
+              mp.display.setCursor(36, 95);
+              mp.display.print(configNTP);
               mp.display.drawRect(64, 58, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(63, 57, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 11: //snm[2]
+              mp.display.setCursor(36, 95);
+              mp.display.print(configNTP);
               mp.display.drawRect(94, 58, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(93, 57, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 12: //snm[3]
+              mp.display.setCursor(36, 95);
+              mp.display.print(configNTP);
               mp.display.drawRect(124, 58, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(123, 57, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 13: //dns[0]
+              mp.display.setCursor(36, 95);
+              mp.display.print(configNTP);
               mp.display.drawRect(34, 76, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(33, 75, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 14: //dns[1]
+              mp.display.setCursor(36, 95);
+              mp.display.print(configNTP);
               mp.display.drawRect(64, 76, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(63, 75, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 15: //dns[2]
+              mp.display.setCursor(36, 95);
+              mp.display.print(configNTP);
               mp.display.drawRect(94, 76, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(93, 75, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 16: //dns[3]
+              mp.display.setCursor(36, 95);
+              mp.display.print(configNTP);
               mp.display.drawRect(124, 76, 28, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.drawRect(123, 75, 30, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               break;
       case 17: //ntp
-              mp.display.drawRect(34, 94, 125, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
-              mp.display.drawRect(33, 93, 127, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
               mp.display.setCursor(2, 112);
               mp.display.print("Erase");
               mp.display.setCursor(133, 112);
               mp.display.print("Help");
+              mp.display.setCursor(36, 95);
+                mp.display.setTextWrap(0);
+                mp.display.print(content);
+                //Serial.println(mp.display.cursor_x);
+                if (mp.display.cursor_x + 8 >= mp.display.width())
+                {
+                  mp.display.drawRect(1, 94, mp.display.width() - 2, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
+                  mp.display.drawRect(2, 93, mp.display.width(), 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
+                  mp.display.fillRect(3, 95, mp.display.width() - 5, 15, TFT_BLACK);
+                  mp.display.setCursor(mp.display.width() - mp.display.cursor_x + 30, 95);
+                  mp.display.print(content);
+                } else {
+                  mp.display.drawRect(34, 94, 125, 18, blinkState ? TFT_BLUE : TFT_DARKGREY);
+                  mp.display.drawRect(33, 93, 127, 20, blinkState ? TFT_BLUE : TFT_DARKGREY);
+                }
+              
               break;
     }
     mp.display.drawFastHLine(0, 110, 160, TFT_WHITE);
@@ -2692,11 +2740,21 @@ void dhcpSettings() {
       else if (cursor >= 1 && cursor <= 4) cursor = 5;
       else if (cursor >= 5 && cursor <= 8) cursor = 9;
       else if (cursor >= 9 && cursor <= 12) cursor = 13;
-      else if (cursor >= 13 && cursor <= 16) cursor = 17;
+      else if (cursor >= 13 && cursor <= 16) { 
+        cursor = 17; 
+        content = configNTP.c_str(); 
+        mp.textInput(content);
+        mp.textPointer = content.length();
+        }
       else cursor = 1;
     }
     else if (mp.buttons.released(BTN_UP)) {
-      if (cursor == 0) cursor = 17;  
+      if (cursor == 0) { 
+        cursor = 17; 
+        content = configNTP.c_str(); 
+        mp.textInput(content);
+        mp.textPointer = content.length();
+        }  
       else if (cursor >= 1 && cursor <= 4) cursor = 0;
       else if (cursor >= 5 && cursor <= 8) cursor = 1;
       else if (cursor >= 9 && cursor <= 12) cursor = 5;
@@ -2708,6 +2766,12 @@ void dhcpSettings() {
     }
     else if (mp.buttons.released(BTN_LEFT) && cursor != 0) cursor--;
     else if (mp.buttons.released(BTN_RIGHT) && cursor != 0 && cursor < 17) cursor++;
+    else if (mp.buttons.released(BTN_RIGHT) && cursor == 16) { 
+      cursor++; 
+      content = configNTP.c_str(); 
+      mp.textInput(content);
+      mp.textPointer = content.length();
+      }
     else if (mp.buttons.released(BTN_RIGHT) && cursor == 17) cursor = 0;
     switch (cursor)
     {
@@ -2921,9 +2985,8 @@ void dhcpSettings() {
                 }
                 mp.update();
               }
-              prevContent = content;
               content = mp.textInput(content, 255);
-              if (prevContent != content) configNTP = content;
+              if (configNTP != content) configNTP = content;
               break; 
     }
     
@@ -2940,7 +3003,6 @@ void dhcpSettings() {
   else loadFromSD();
   return;
 }
-
 
 
 // --------------------
