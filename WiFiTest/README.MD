@@ -6,7 +6,7 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 ![Screenshot](WiFiTest_screenshot.jpg) ![Screenshot](WiFiTest_DHCPSettings_screenshot.jpg)
 ![Screenshot](WiFiTest_ChatServer_screenshot_0.4.1.jpg)
 
-## **v1.2.2 - Easy Updates are HERE!**
+## **v1.2.3 - Easy Updates are HERE!**
 
 **Main Menu:**
  * **Choose Network** - You'll need to connect to your Wifi network before you do anything else. Your network settings are saved to the SD card
