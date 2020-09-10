@@ -7,7 +7,7 @@
  * A lot of code was sourced from https://github.com/CircuitMess/
  * and the Arduino Tutorials and Examples. All MIT licensed.
 */
-const String progVer= "1.2.1";
+const String progVer= "1.2.2";
 
 // ----------------------------------------
 // -----       PROGRAM CONSTANTS      -----
@@ -2670,14 +2670,18 @@ void setup()
   mp.homePopupEnable(1);   // Enable homePopup()
   mp.display.fillScreen(TFT_BLACK);
   mp.display.drawIcon(WiFiTestSplash, 0, 0, 160, 128, 1, TFT_BLACK);
-  mp.display.setCursor(0, 85);
+  mp.display.setCursor(0, 75);
   mp.display.printCenter(String("v" + progVer));
   mp.display.pushSprite(0, 0);
   delay(2000);
   mp.display.setCursor(3, 110);
-  mp.display.printCenter("Loading settings...");
+  mp.display.print("Loading settings...");
   mp.display.pushSprite(0, 0);
   loadFromSD();
+  delay(250);
+  mp.display.println("DONE!");
+  mp.display.pushSprite(0, 0);
+  delay(250);
 }
 
 void loop()
