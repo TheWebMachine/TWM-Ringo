@@ -7,16 +7,17 @@
  * A lot of code was sourced from https://github.com/CircuitMess/
  * and the Arduino Tutorials and Examples. All MIT licensed.
 */
-const String progVer = "1.1.2";
+const String progVer= "1.2.0";
 
 // ----------------------------------------
 // -----       PROGRAM CONSTANTS      -----
-// ----- (skip to line 1300 for code) -----
+// ----- (skip to line 1350 for code) -----
 // ----------------------------------------
 const byte network[] PROGMEM = {16, 12, B00011111, B10000000, B00100000, B01000000, B01000000, B00100000, B10000000, B00010000, B00011111, B10000000, B00100000, B01000000, B01000000, B00100000, B00001111, B00000000, B00010000, B10000000, B00000000, B00000000, B00000110, B00000000, B00001111, B00000000,};
 const byte composeIcon[] PROGMEM = {16, 9, B01111111, B10000000, B10000000, B01000000, B10111111, B01000000, B10000000, B01000000, B10111110, B01000000, B10000000, B01000000, B01001111, B10000000, B01010000, B00000000, B01100000, B00000000,};
 const byte timeIcon[] PROGMEM = {16, 12, B00011111, B10000000, B00100000, B01000000, B01000100, B00100000, B10000100, B00010000, B10000100, B00010000, B10000100, B00010000, B10000111, B10010000, B10000000, B00010000, B10000000, B00010000, B01000000, B00100000, B00100000, B01000000, B00011111, B10000000,};
 const byte soundIcon[] PROGMEM = {16, 12, B00000010, B00000000, B00000110, B01000000, B00001110, B00100000, B00011110, B10010000, B11111110, B01010000, B11111110, B01010000, B11111110, B01010000, B11111110, B01010000, B00011110, B10010000, B00001110, B00100000, B00000110, B01000000, B00000010, B00000000,};
+const byte security[] PROGMEM = {16,12,B00011111,B10000000,B00100000,B01000000,B00100000,B01000000,B00100000,B01000000,B00100000,B01000000,B01111111,B11100000,B10000000,B00010000,B10000110,B00010000,B10000110,B00010000,B10000110,B00010000,B10000000,B00010000,B01111111,B11100000,};
 const unsigned short TextHelperPopup[0x5000] PROGMEM ={
   0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514,   // 0x0010 (16)
   0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514,   // 0x0020 (32)
@@ -1299,13 +1300,63 @@ const unsigned short TextHelperPopup[0x5000] PROGMEM ={
   0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514,   // 0x4FF0 (20464)
   0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514,   // 0x5000 (20480)
 };
+const char* ca = \
+  "-----BEGIN CERTIFICATE-----\n" \
+  "MIIHMDCCBhigAwIBAgIQAkk+B/qeN1otu8YdlEMPzzANBgkqhkiG9w0BAQsFADBw\n" \
+  "MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3\n" \
+  "d3cuZGlnaWNlcnQuY29tMS8wLQYDVQQDEyZEaWdpQ2VydCBTSEEyIEhpZ2ggQXNz\n" \
+  "dXJhbmNlIFNlcnZlciBDQTAeFw0yMDA1MDYwMDAwMDBaFw0yMjA0MTQxMjAwMDBa\n" \
+  "MGoxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1T\n" \
+  "YW4gRnJhbmNpc2NvMRUwEwYDVQQKEwxHaXRIdWIsIEluYy4xFzAVBgNVBAMTDnd3\n" \
+  "dy5naXRodWIuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsj49\n" \
+  "6jJ99veEXO7WdxGQZ7idtCnDcjZqQeDiy6057SwXj9yDUVnqhwo/yII8+y6Jpk3g\n" \
+  "75LpPpYNjiOwYp/JkpWbpBAd1FWlvXJo/eZS+TwuIYb7JSc2H3NDDKt2VV5SSKQd\n" \
+  "XOkDNqq7BisOFp2/TYwCMZboLufwRR5fKxL0nTKIOCwpnH8k//UdWpvTgIixDGLY\n" \
+  "QCwHt0fYEo49jFeDaKD4WMBPq6Tx1iKWBhw3HVc/OyvI3yjRAx4Anf/DCSt9YTW6\n" \
+  "f/ND4O/fOowcfW5T7zii1Kw0yw+ulBrE/xe6taVhL+QR0MXNkQV2iHNN85swidwM\n" \
+  "tcdGI8g3fYL48bSRywIDAQABo4IDyjCCA8YwHwYDVR0jBBgwFoAUUWj/kK8CB3U8\n" \
+  "zNllZGKiErhZcjswHQYDVR0OBBYEFIygCmlH3IkysE3GEUViXxovlk46MHsGA1Ud\n" \
+  "EQR0MHKCDnd3dy5naXRodWIuY29tggwqLmdpdGh1Yi5jb22CCmdpdGh1Yi5jb22C\n" \
+  "CyouZ2l0aHViLmlvgglnaXRodWIuaW+CFyouZ2l0aHVidXNlcmNvbnRlbnQuY29t\n" \
+  "ghVnaXRodWJ1c2VyY29udGVudC5jb20wDgYDVR0PAQH/BAQDAgWgMB0GA1UdJQQW\n" \
+  "MBQGCCsGAQUFBwMBBggrBgEFBQcDAjB1BgNVHR8EbjBsMDSgMqAwhi5odHRwOi8v\n" \
+  "Y3JsMy5kaWdpY2VydC5jb20vc2hhMi1oYS1zZXJ2ZXItZzYuY3JsMDSgMqAwhi5o\n" \
+  "dHRwOi8vY3JsNC5kaWdpY2VydC5jb20vc2hhMi1oYS1zZXJ2ZXItZzYuY3JsMEwG\n" \
+  "A1UdIARFMEMwNwYJYIZIAYb9bAEBMCowKAYIKwYBBQUHAgEWHGh0dHBzOi8vd3d3\n" \
+  "LmRpZ2ljZXJ0LmNvbS9DUFMwCAYGZ4EMAQICMIGDBggrBgEFBQcBAQR3MHUwJAYI\n" \
+  "KwYBBQUHMAGGGGh0dHA6Ly9vY3NwLmRpZ2ljZXJ0LmNvbTBNBggrBgEFBQcwAoZB\n" \
+  "aHR0cDovL2NhY2VydHMuZGlnaWNlcnQuY29tL0RpZ2lDZXJ0U0hBMkhpZ2hBc3N1\n" \
+  "cmFuY2VTZXJ2ZXJDQS5jcnQwDAYDVR0TAQH/BAIwADCCAX0GCisGAQQB1nkCBAIE\n" \
+  "ggFtBIIBaQFnAHYARqVV63X6kSAwtaKJafTzfREsQXS+/Um4havy/HD+bUcAAAFx\n" \
+  "6y8fFgAABAMARzBFAiEA59y6w9oaoAoM2fvFq6KofYWRh0xRm4VEEaMHBtsBYUgC\n" \
+  "IBZxJhjA7SGWUlo57YslG8u6clHngDNvoTNVw1HQtTr3AHUAIkVFB1lVJFaWP6Ev\n" \
+  "8fdthuAjJmOtwEt/XcaDXG7iDwIAAAFx6y8evwAABAMARjBEAiBmEjiioTbc1//h\n" \
+  "CInYIX6O8hph5oLRVGCTxrTBfSRT2wIgZz7x3ZNIKQkWPKOFaaW3AxcB0DzhFsD6\n" \
+  "gxhkbl1p0AgAdgBRo7D1/QF5nFZtuDd4jwykeswbJ8v3nohCmg3+1IsF5QAAAXHr\n" \
+  "Lx8JAAAEAwBHMEUCIBQ/6El+TCCtWuop7IderN0+byn5sDreTu+Xz3GiY8cLAiEA\n" \
+  "7S83HxFFdQhQqpjjbWbIVBA88Nn/riaf5Jb8h3oJV8cwDQYJKoZIhvcNAQELBQAD\n" \
+  "ggEBAADzu/I/4dMPwG4QzMFHZmgQFlnc/xqXtaNLqONIzXPznBQmHQi481xKgAR4\n" \
+  "jZOTTknlwOLBXnDXvV6rJQZXut3pxHSvVJk2kvuyDO3RC0uudd81AXIUsd6Pnjt2\n" \
+  "D6Xd/ypUAoMkyE+8euYESEFk4HlnrpXtN7OSTGVYZQk0aJrDINslXdmUL9E6AQiI\n" \
+  "YaRIpRMRdj4stG6CkPJpfSauWa19kReZ6hTQR5f89L6x50us7GuWlmH6EmVFIbhf\n" \
+  "9EO02QA3CcU7bE1iLWMHmKcU6ythmgsvNRU5TikxvF77JFv7n1/y8GLrprmKpB6Q\n" \
+  "Df4PA8S9ROX9Rzgwe3KTIM6qeKU=\n" \
+  "-----END CERTIFICATE-----\n";
 
 
 
+
+
+// This is where the magic begins!!!
 
 #include <MAKERphone.h>
 MAKERphone mp;
 bool helpPop;
+File origFile;
+File destFile;
+
+char updateURL[] = "https://raw.githubusercontent.com/TheWebMachine/TWM-Ringo/master/WiFiTest/WiFiTest.bin";
+File updateFile;
 
 String connectedToSSID;
 String connectedToPass;
@@ -1322,6 +1373,7 @@ IPAddress configSNM;
 IPAddress configDNS;
 String configNTP = "time.nist.gov";
 File SettingsFile; // connectedToSSID|connectedToPass|useDHCP|configIP|configGW|configSNM|configDNS|configNTP
+
 
 void setup()
 {
@@ -1355,13 +1407,51 @@ void loop()
 // ----------------------------
 
 // Display (on==true) or erase (on==false) transient status line near bottom of display
-void statusline(char *msg, bool on)
-{
+void statusline(char *msg, bool on) {
   mp.display.setTextColor(on ? TFT_YELLOW : TFT_BLACK);
   mp.display.setCursor(0, 100);
   mp.display.print(msg);
   mp.display.pushSprite(0, 0);
+}
 
+// dblPr("text to print", bool newLine) - Prints to both Serial Monitor and Display
+void dblPr(String msg, bool newLine=0);
+void dblPr(String msg, bool newLine) {
+  if (newLine) {
+    Serial.println(msg);
+    mp.display.println(msg);
+  }
+  else {
+    Serial.print(msg);
+    mp.display.print(msg);
+  }
+}
+
+// copyFile(origFileName, destFileName) - Copies existing SD card file to new file with new name
+bool copyFile(String origFileName, String destFileName) {
+  SD.remove(destFileName);
+  origFile = SD.open(origFileName, FILE_READ);
+  if (!origFile) {
+    Serial.println("Can't open Orig file!");
+    return 0;
+  }
+  destFile = SD.open(destFileName, FILE_WRITE);
+  if (!destFile) {
+    Serial.println("Can't create Dest file!");
+    return 0;
+  }
+  size_t n; 
+  uint8_t buf[64];
+  while ((n = origFile.read(buf, sizeof(buf))) > 0) {
+    destFile.write(buf, n);
+  }
+  origFile.close();
+  destFile.close();
+  Serial.print("Copied ");
+  Serial.print(origFileName);
+  Serial.print(" to ");
+  Serial.println(destFileName);
+  return 1;
 }
 
 // Reconnect to WiFi network (if enabled) using saved settings
@@ -1498,7 +1588,6 @@ void loadFromSD()
       if (setting.length() > 0) {
         connectedToPass = setting;
         Serial.println("connectedToPass: ******** (hidden for privacy)");
-        //Serial.println(connectedToPass);
       }
       else Serial.println("Invalid or missing connectedToPass...ignoring!");
       setting = SettingsFile.readStringUntil('|');
@@ -1588,7 +1677,7 @@ void loadFromSD()
     }
   }
   else {
-    Serial.println("Error opening settings.txt");
+    dblPr("Error opening settings.txt", 1);
     while (!mp.update());
     delay(2000);
   }
@@ -1698,11 +1787,12 @@ bool currentStatus() {
 // Borrowed from Ringo firmware settingsApp
 boolean colorSetup = 0;
 int32_t mainMenuYOffset;
-String mainMenuItems[4] PROGMEM = {
+String mainMenuItems[5] PROGMEM = {
   "Choose Network",
   "DHCP Settings",
   "NTP Test",
-  "Chat Server"
+  "Chat Server",
+  "Update WiFiTest"
 };
 
 bool showMainMenu() {
@@ -1711,20 +1801,13 @@ bool showMainMenu() {
   {
     mp.inCall = 0;
     while (!mp.update());
-    input = mainMenu(mainMenuItems, 4, input);
-    if (input == -1) //BUTTON BACK
-      break;
-    if (input == 0)
-      wifiConnect();
-    if (input == 1) {
-      dhcpSettings();
-    }
-    if (input == 2)
-      ntpTest();
-    if (input == 3)
-      wifiChat();
-    //if (input == 4)
-    //securityMenu();
+    input = mainMenu(mainMenuItems, 5, input);
+    if (input == -1) break;
+    if (input == 0) wifiConnect();
+    if (input == 1) dhcpSettings();
+    if (input == 2) ntpTest();
+    if (input == 3) wifiChat();
+    if (input == 4) updateApp();
     //if (input == 5)
     //if(updateMenu())
     //return true;
@@ -1761,10 +1844,10 @@ void mainMenuDrawBox(String title, uint8_t i, int32_t y) {
     mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 2, 0xA7FF);
     mp.display.drawBitmap(6, y + 2 * scale, soundIcon, 0x010F);
   }
-  if (title == "Security")//purple
+  if (title == "Update WiFiTest")//purple
   {
     mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 2, 0xED1F);
-    //mp.display.drawBitmap(6, y + 2*scale, security, 0x600F);
+    mp.display.drawBitmap(6, y + 2*scale, security, 0x600F);
   }
   if (title == "About & update")//orange
   {
@@ -2035,8 +2118,8 @@ void wifiConnect()
           mp.display.print("Erase");
           mp.display.setCursor(22, 83);
           mp.display.print("Press A to confirm");
-          //mp.display.setCursor(133, 112);
-          //mp.display.print("Help");
+          mp.display.setCursor(133, 112);
+          mp.display.print("Help");
           if (millis() - elapsedMillis >= multi_tap_threshold) //cursor blinking routine
           {
             elapsedMillis = millis();
@@ -2068,7 +2151,17 @@ void wifiConnect()
           }
           if (blinkState == 1)
             mp.display.drawFastVLine(mp.display.getCursorX(), mp.display.getCursorY(), 16, TFT_WHITE);
-
+          if(mp.buttons.released(BTN_FUN_RIGHT)){
+              helpPop = !helpPop;
+              mp.display.drawIcon(TextHelperPopup, 0, 0, 160, 128, 1, TFT_WHITE); 
+              while(!mp.update());
+            }
+            while (helpPop) {
+              if(mp.buttons.released(BTN_FUN_RIGHT) || mp.buttons.released(BTN_B)){
+                helpPop = !helpPop;
+              }
+            mp.update();
+            }
           if ((mp.buttons.released(BTN_A)) && content.length() > 0)
           {
             Serial.println("Password set");
@@ -3005,6 +3098,7 @@ void dhcpSettings() {
 }
 
 
+
 // --------------------
 // ----- NTP TEST -----
 // --------------------
@@ -3202,10 +3296,8 @@ void wifiChat() {
   disconnectWiFi = 0;
   reconnectWiFi();
   while (!mp.update());
-  Serial.println("Requesting server on port 23...");
   WiFiServer server(23);
   WiFiClient clients[8];
-  Serial.println("...done.");
   boolean alreadyConnected = false; // whether or not the client was connected previously
   mp.display.fillScreen(TFT_BLACK);
   mp.display.setCursor(0, 0);
@@ -3243,8 +3335,9 @@ void wifiChat() {
     return;
   }
   else rebootNeeded = 1;
-  Serial.println("Starting server...");
+  Serial.print("Starting server on port 23...");
   server.begin();
+  Serial.println("done.");
   Serial.println("check for IP");
   ip = WiFi.localIP();
   Serial.println(ip);
@@ -3295,10 +3388,12 @@ void wifiChat() {
     // stop any clients which disconnect
     for (byte i = 0; i < 8; i++) {
       if (clients[i] && !clients[i].connected()) {
-        Serial.print("disconnect client #");
-        Serial.println(i);
-        mp.display.print("Disconnect client number: ");
-        mp.display.println(i);
+        //Serial.print("disconnect client #");
+        //Serial.println(i);
+        //mp.display.print("Disconnect client number: ");
+        //mp.display.println(i);
+        dblPr("Disconnect client #: ");
+        dblPr(String(i), 1);
         while (!mp.update());
         clients[i].stop();
       }
@@ -3310,10 +3405,12 @@ void wifiChat() {
     {
       for (byte i = 0; i < 8; i++) {
         if (clients[i] && clients[i].connected()) {
-          Serial.print("disconnect client #");
-          Serial.println(i);
-          mp.display.print("Disconnect client #: ");
-          mp.display.println(i);
+          //Serial.print("disconnect client #");
+          //Serial.println(i);
+          //mp.display.print("Disconnect client #: ");
+          //mp.display.println(i);
+          dblPr("Disconnect client #: ");
+          dblPr(String(i), 1);
           while (!mp.update());
           clients[i].stop();
         }
@@ -3322,4 +3419,118 @@ void wifiChat() {
       return;
     }
   }
+}
+
+
+
+// ---------------------------
+// ----- Update WiFiTest -----
+// ---------------------------
+// Shoutout to Frank for helping me with the HTTPS calls!
+void updateApp() {
+  mp.inCall = 1;
+  disconnectWiFi = 0;
+  reconnectWiFi();
+  while (!mp.update());
+  mp.display.fillScreen(TFT_BLACK);
+  mp.display.setCursor(0, 0);
+  mp.display.setTextSize(1);
+  mp.display.setTextFont(2);
+  while (!mp.update());
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    mp.display.setTextColor(TFT_BLACK);
+    mp.display.setTextSize(1);
+    mp.display.setTextFont(2);
+    mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
+    mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
+    mp.display.fillRect(5, 50, 150, 26, 0xFD29);
+    mp.display.setCursor(47, 54);
+    mp.display.printCenter("Not connected! :(");
+    Serial.println("Not connected! :(");
+    while (!mp.update());
+    delay(2000);
+    return;
+  }
+  HTTPClient http;
+  //WiFiClient client;
+  //WiFiClient* stream;
+  Serial.println("User requests App Update");
+  mp.display.setTextColor(TFT_BLUE);
+  mp.display.printCenter("WiFiTest Update");
+  mp.display.println();
+  mp.display.setTextColor(TFT_WHITE);
+  mp.display.setTextFont(1);
+  
+  mp.display.println("Starting update!");
+  String curVerName = String("/WiFiTest/WiFiTest.v" + String(progVer.charAt(0)) + String(progVer.charAt(2)) + String(progVer.charAt(4)) + ".bin");
+  dblPr("Backup old ver...");
+  mp.display.pushSprite(0, 0);
+  if (copyFile("/WiFiTest/WiFiTest.bin", curVerName)) dblPr("DONE!", 1);
+  else {
+    dblPr("ERROR!", 1);
+    delay(2000);
+    return;
+  }
+  
+  dblPr("Downloading...");
+  mp.display.pushSprite(0, 0);
+  SD.remove("/WiFiTest/WiFiTest.bin");
+  updateFile = SD.open("/WiFiTest/WiFiTest.bin", FILE_WRITE);
+  http.begin(updateURL, ca);
+  int httpCode = http.GET();
+  if(httpCode > 0) {
+    if(httpCode == HTTP_CODE_OK) {
+      http.writeToStream(&updateFile);
+      http.end();
+      updateFile.flush();
+    } 
+    else {
+      dblPr("ERROR!", 1);
+      updateFile.close();
+      dblPr("Restore old ver...");
+      mp.display.pushSprite(0, 0);
+      if (copyFile(curVerName, "/WiFiTest/WiFiTest.bin"))
+        SD.remove(curVerName);
+      dblPr("DONE!", 1);
+      mp.display.pushSprite(0, 0);
+      delay(2000);
+      return;
+    }
+  } 
+  else {
+    dblPr("ERROR!", 1);
+    updateFile.close();
+    dblPr("Restore old ver...");
+    mp.display.pushSprite(0, 0);
+    if (copyFile(curVerName, "/WiFiTest/WiFiTest.bin"))
+      SD.remove(curVerName);
+    dblPr("DONE!", 1);
+    mp.display.pushSprite(0, 0);
+    delay(2000);
+    return;
+  }
+
+  http.end();
+  dblPr("DONE!", 1);
+  if (!updateFile.size()) {
+    dblPr("ERROR! File size = 0", 1);
+    updateFile.close();
+    dblPr("Restore old ver...");
+    mp.display.pushSprite(0, 0);
+    if (copyFile(curVerName, "/WiFiTest/WiFiTest.bin"))
+      SD.remove(curVerName);
+    dblPr("DONE!", 1);
+    mp.display.pushSprite(0, 0);
+    delay(2000);
+    return;
+  } 
+    
+  dblPr("", 1);
+  dblPr("Returning Home so you can", 1);
+  dblPr("launch the new version...", 1);
+  mp.display.pushSprite(0, 0);
+  delay(5000);
+  mp.loader(); 
+
 }
