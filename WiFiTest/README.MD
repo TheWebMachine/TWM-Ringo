@@ -6,7 +6,7 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 ![Screenshot](WiFiTest_screenshot.jpg) ![Screenshot](WiFiTest_DHCPSettings_screenshot.jpg)
 ![Screenshot](WiFiTest_ChatServer_screenshot_0.4.1.jpg)
 
-## **v1.2.0 - Easy Updates are HERE!**
+## **v1.2.1 - Easy Updates are HERE!**
 
 **Main Menu:**
  * **Choose Network** - You'll need to connect to your Wifi network before you do anything else. Your network settings are saved to the SD card
@@ -48,17 +48,14 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 -----
 -----
 _**Recent Changes:**_
- * Added Update WiFiTest to download the latest .bin to your SD card
- * FIX: DHCP Settings page > NTP field was missing long text scrolling
- * Cleaned up and rearranged some code; prep for additional menus
- * Added Current Status screen (press `Right Softkey` at Main Menu or during NTP Test)
- * DHCP Settings menu is now available. You can turn DHCP on/off and manually specify your IP/GW/SubnetMask/DNS/NTP settings
+ * Added Splash screen at app launch
+ * Added **Update WiFiTest** to download the latest .bin to your SD card
+ * FIX: **DHCP Settings** page > NTP field was missing long text scrolling
+ * Added **Current Status** screen (press `Right Softkey` at Main Menu or during NTP Test)
+ * **DHCP Settings** menu is now available. You can turn DHCP on/off and manually specify your IP/GW/SubnetMask/DNS/NTP settings
  * FIX: Connecting to Open/password-less networks was not being saved properly
  * We now save WiFi network settings to SD/WiFiTest/settings.txt
- * Added Telnet Chat Server
- * Added a live signal strength meter to the bottom status line
- * Added back homePopup() when you press the HOME button (fixed the restart issue)
- * mp.inCall (ability to sleep/save power) is now dynamically enabled/disabled as it makes sense to (WILL sleep at general menus, will NOT sleep during a test or while connecting to WiFi)
+ * Added Telnet **Chat Server**
 -----
 -----
 _**Future Plans:**_
