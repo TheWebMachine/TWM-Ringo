@@ -6,22 +6,23 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 ![Screenshot](WiFiTest_screenshot_0.4.0.jpg) ![Screenshot](WiFiTest_DHCPSettings_screenshot.jpg)
 ![Screenshot](WiFiTest_ChatServer_screenshot_0.4.1.jpg)
 
-## **v1.1.2 - Everyone gets a Status Screen!**
+## **v1.2.0 - Easy Updates are HERE!**
 
 **Main Menu:**
- * **Choose Network** - You'll need to connect to your Wifi network before you do anything else. Your network settings are saved to the SD card. 
+ * **Choose Network** - You'll need to connect to your Wifi network before you do anything else. Your network settings are saved to the SD card
    * **NOTE: WiFi Password is saved to SD card in plaintext!**
    * **REMEMBER: Ringo only supports 2GHz WiFi Networks!**
  * **DHCP Settings** - This will allow you to specify network settings like IP, DNS, NTP server, etc
- * **NTP Test** - The first test added to this app, originally written by Frank Prindle.
+ * **NTP Test** - The first test added to this app, originally written by Frank Prindle
  * **Chat Server** - A Telnet chat server for multiple clients to connect to. 
-   * PuTTY works well with this (duplicate multiple sessions to see it in action). 
-   * Messages sent by one client are sent to all other connected clients, but _NOT_ to the originating client.
+   * PuTTY works well with this (duplicate multiple sessions to see it in action)
+   * Messages sent by one client are sent to all other connected clients, but _NOT_ to the originating client
+ * **Update WiFiTest** - This will download the latest WiFiTest.bin from this repo to your SD card, _so you don't have to!_ It backs up the current version to WiFiTest.v###.bin before starting the download. Once new version is downloaded, you are taken back to the Ringo loader so you can launch the new version **(HUGE thanks to Frank for helping me to get this working!)**
  * `Left Softkey` will toggle the WiFi network connection on/off
  * `Right Softkey` will show Current Status screen with network information
- * If you attempt to access NTP Test or Chat Server without being connected to Wifi, the app will first attempt to connect to your saved network. If that fails, you will receive a prompt telling you to connect first. 
- * Pressing the `B` button from within a test or settings menus will take you back to the Main Menu. 
- * Pressing `HOME` will bring up the homePopup() menu, allowing you to adjust settings or exit the program and return to the Ringo Loader.
+ * If you attempt to access NTP Test or Chat Server without being connected to Wifi, the app will first attempt to connect to your saved network. If that fails, you will receive a prompt telling you to connect first
+ * Pressing the `B` button from within a test or settings menus will take you back to the Main Menu
+ * Pressing `HOME` will bring up the homePopup() menu, allowing you to adjust settings or exit the program and return to the Ringo Loader
 -----
 **DHCP Settings Menu:**
  * `Joystick` will move between the fields; including `left-right` to move between octets, with exception to the DHCP option where `left-right` toggles the option
@@ -47,11 +48,12 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 -----
 -----
 _**Recent Changes:**_
+ * Added Update WiFiTest to download the latest .bin to your SD card
  * FIX: DHCP Settings page > NTP field was missing long text scrolling
  * Cleaned up and rearranged some code; prep for additional menus
  * Added Current Status screen (press `Right Softkey` at Main Menu or during NTP Test)
- * DHCP Settings menu is now available. You can turn DHCP on/off and manually specify your IP/GW/SubnetMask/DNS/NTP settings.
- * FIX: Connecting to Open/password-less networks was not being saved properly.
+ * DHCP Settings menu is now available. You can turn DHCP on/off and manually specify your IP/GW/SubnetMask/DNS/NTP settings
+ * FIX: Connecting to Open/password-less networks was not being saved properly
  * We now save WiFi network settings to SD/WiFiTest/settings.txt
  * Added Telnet Chat Server
  * Added a live signal strength meter to the bottom status line
