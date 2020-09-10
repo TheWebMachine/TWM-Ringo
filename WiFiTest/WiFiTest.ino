@@ -7,7 +7,7 @@
  * A lot of code was sourced from https://github.com/CircuitMess/
  * and the Arduino Tutorials and Examples. All MIT licensed.
 */
-const String progVer= "1.2.2";
+const String progVer= "1.2.3";
 
 // ----------------------------------------
 // -----       PROGRAM CONSTANTS      -----
@@ -4830,6 +4830,7 @@ void updateApp() {
 
   // Go Home
   dblPr("", 1);
+  mp.display.setTextColor(TFT_RED);
   dblPr("Returning Home so you can", 1);
   dblPr("launch the new version...", 1);
   mp.display.pushSprite(0, 0);
