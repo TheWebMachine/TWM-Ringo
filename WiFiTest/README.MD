@@ -6,17 +6,18 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 ![Screenshot](WiFiTest_screenshot.jpg) ![Screenshot](WiFiTest_DHCPSettings_screenshot.jpg)
 ![Screenshot](WiFiTest_ChatServer_screenshot_0.4.1.jpg)
 
-## **v1.2.3 - Easy Updates are HERE!**
+## **v1.2.5 - Easy Updates are HERE!**
 
 **Main Menu:**
  * **Choose Network** - You'll need to connect to your Wifi network before you do anything else. Your network settings are saved to the SD card
    * **NOTE: WiFi Password is saved to SD card in plaintext!**
    * **REMEMBER: Ringo only supports 2GHz WiFi Networks!**
  * **DHCP Settings** - This will allow you to specify network settings like IP, DNS, NTP server, etc
- * **NTP Test** - The first test added to this app, originally written by Frank Prindle
- * **Chat Server** - A Telnet chat server for multiple clients to connect to. 
-   * PuTTY works well with this (duplicate multiple sessions to see it in action)
-   * Messages sent by one client are sent to all other connected clients, but _NOT_ to the originating client
+ * **► Tests Menu**
+    * **NTP Test** - The first test added to this app, originally written by Frank Prindle
+    * **Chat Server** - A Telnet chat server for multiple clients to connect to. 
+      * PuTTY works well with this (duplicate multiple sessions to see it in action)
+      * Messages sent by one client are sent to all other connected clients, but _NOT_ to the originating client
  * **Update WiFiTest** - This will download the latest WiFiTest.bin from this repo to your SD card, _so you don't have to!_ It backs up the current version to WiFiTest.v###.bin before starting the download. Once new version is downloaded, you are taken back to the Ringo loader so you can launch the new version **(HUGE thanks to Frank for helping me to get this working!)**
  * `Left Softkey` will toggle the WiFi network connection on/off
  * `Right Softkey` will show Current Status screen with network information
@@ -48,6 +49,7 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 -----
 -----
 _**Recent Changes:**_
+ * Add Test Menu and move tests to that sub-menu
  * Added Splash screen at app launch
  * Added **Update WiFiTest** to download the latest .bin to your SD card
  * FIX: **DHCP Settings** page > NTP field was missing long text scrolling
