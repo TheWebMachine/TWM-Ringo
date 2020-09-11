@@ -3,10 +3,11 @@
 First off, huge thanks to the CircuitMess team and shoutout to Frank Prindle (https://community.circuitmess.com/u/frankprindle) for the
 first draft of this code. It is definitely a WIP, but the hope is to expand it into a full WiFi utility for Ringo.
 
-![Screenshot](WiFiTest_screenshot.jpg) ![Screenshot](WiFiTest_DHCPSettings_screenshot.jpg)
-![Screenshot](WiFiTest_ChatServer_screenshot_0.4.1.jpg)
+![Screenshot](WiFiTest_screenshot.jpg) 
+![Screenshot](WiFiTest_DHCPSettings_screenshot.jpg)
+![Screenshot](WiFiTest_ChatServer_screenshot.jpg)
 
-## **v1.2.5 - Easy Updates are HERE!**
+## **v1.2.6 - The More Menus, the Merrier!**
 
 **Main Menu:**
  * **Choose Network** - You'll need to connect to your Wifi network before you do anything else. Your network settings are saved to the SD card
@@ -49,6 +50,7 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 -----
 -----
 _**Recent Changes:**_
+ * Make Chat Server prettier by showing when client connects, which client sent message, and increase message buffer to 5k to prevent fragmentation
  * Add Test Menu and move tests to that sub-menu
  * Added Splash screen at app launch
  * Added **Update WiFiTest** to download the latest .bin to your SD card
