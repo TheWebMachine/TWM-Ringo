@@ -7,7 +7,7 @@
  * A lot of code was sourced from https://github.com/CircuitMess/
  * and the Arduino Tutorials and Examples. Do with it what you will.
 */
-const String progVer= "1.2.5";
+const String progVer= "1.2.6";
 
 // ----------------------------------------
 // -----       PROGRAM CONSTANTS      -----
@@ -4813,12 +4813,13 @@ void ntpTest()
 // ----- WiFiChatServer -----
 // --------------------------
 void wifiChat() {
+  int maxClients = 8;
   mp.inCall = 1;
   disconnectWiFi = 0;
   reconnectWiFi();
   while (!mp.update());
   WiFiServer server(23);
-  WiFiClient clients[8];
+  WiFiClient clients[maxClients];
   boolean alreadyConnected = false; // whether or not the client was connected previously
   mp.display.fillScreen(TFT_BLACK);
   mp.display.setCursor(0, 0);
@@ -4874,10 +4875,11 @@ void wifiChat() {
     // check for any new client connecting, and say hello (before any incoming data)
     WiFiClient newClient = server.accept();
     if (newClient) {
-      for (byte i = 0; i < 8; i++) {
+      for (byte i = 0; i < maxClients; i++) {
         if (!clients[i]) {
           Serial.print("We have a new client #");
           Serial.println(i);
+          newClient.flush();
           newClient.print("Hello, client number: ");
           newClient.println(i);
           mp.display.print("Hello, client number: ");
@@ -4886,33 +4888,52 @@ void wifiChat() {
           // Once we "accept", the client is no longer tracked by EthernetServer
           // so we must store it into our list of clients
           clients[i] = newClient;
+          for (byte j = 0; j < maxClients; j++) {
+            if (j != i && clients[j].connected()) {
+              clients[j].print("Client number ");
+              clients[j].print(i);
+              clients[j].println(" connected!");
+            }
+          }
           break;
         }
+        
       }
     }
 
     // check for incoming data from all clients
-    for (byte i = 0; i < 8; i++) {
+    for (byte i = 0; i < maxClients; i++) {
       if (clients[i] && clients[i].available() > 0) {
         // read bytes from a client
-        byte buffer[80];
-        int count = clients[i].read(buffer, 80);
+        byte buffer[5120];
+        int count = clients[i].read(buffer, 5120);
         // write the bytes to all other connected clients
-        for (byte j = 0; j < 8; j++) {
-          if (j != i && clients[j].connected()) {
-            clients[j].write(buffer, count);
+        if (buffer[0] != 255 && buffer[0] != 13) { 
+          for (byte j = 0; j < maxClients; j++) {
+            if (j != i && clients[j].connected()) {
+              clients[j].print("[Client ");
+              clients[j].print(i);
+              clients[j].print("]: ");
+              clients[j].write(buffer, count);
+              clients[j].println();
+            }
           }
         }
+        Serial.print("[Client ");
+        Serial.print(i);
+        Serial.print("]: ");
+        Serial.write(buffer, count);
+        Serial.println();
       }
     }
 
     // stop any clients which disconnect
-    for (byte i = 0; i < 8; i++) {
+    for (byte i = 0; i < maxClients; i++) {
       if (clients[i] && !clients[i].connected()) {
-        //Serial.print("disconnect client #");
-        //Serial.println(i);
-        //mp.display.print("Disconnect client number: ");
-        //mp.display.println(i);
+        Serial.print("disconnect client #");
+        Serial.println(i);
+        mp.display.print("Disconnect client number: ");
+        mp.display.println(i);
         dblPr("Disconnect client #: ");
         dblPr(String(i), 1);
         while (!mp.update());
@@ -4924,7 +4945,7 @@ void wifiChat() {
     mp.buttons.update();
     if (mp.buttons.released(BTN_B))
     {
-      for (byte i = 0; i < 8; i++) {
+      for (byte i = 0; i < maxClients; i++) {
         if (clients[i] && clients[i].connected()) {
           //Serial.print("disconnect client #");
           //Serial.println(i);
