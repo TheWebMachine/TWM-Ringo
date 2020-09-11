@@ -5,19 +5,22 @@
  * 
  * NTP Example originally coded 5/10/2020 by Frank Prindle.
  * A lot of code was sourced from https://github.com/CircuitMess/
- * and the Arduino Tutorials and Examples. All MIT licensed.
+ * and the Arduino Tutorials and Examples. Do with it what you will.
 */
-const String progVer= "1.2.3";
+const String progVer= "1.2.5";
 
 // ----------------------------------------
 // -----       PROGRAM CONSTANTS      -----
-// ----- (skip to line 2630 for code) -----
+// ----- (skip to line 2635 for code) -----
 // ----------------------------------------
 const byte network[] PROGMEM = {16, 12, B00011111, B10000000, B00100000, B01000000, B01000000, B00100000, B10000000, B00010000, B00011111, B10000000, B00100000, B01000000, B01000000, B00100000, B00001111, B00000000, B00010000, B10000000, B00000000, B00000000, B00000110, B00000000, B00001111, B00000000,};
 const byte composeIcon[] PROGMEM = {16, 9, B01111111, B10000000, B10000000, B01000000, B10111111, B01000000, B10000000, B01000000, B10111110, B01000000, B10000000, B01000000, B01001111, B10000000, B01010000, B00000000, B01100000, B00000000,};
 const byte timeIcon[] PROGMEM = {16, 12, B00011111, B10000000, B00100000, B01000000, B01000100, B00100000, B10000100, B00010000, B10000100, B00010000, B10000100, B00010000, B10000111, B10010000, B10000000, B00010000, B10000000, B00010000, B01000000, B00100000, B00100000, B01000000, B00011111, B10000000,};
 const byte soundIcon[] PROGMEM = {16, 12, B00000010, B00000000, B00000110, B01000000, B00001110, B00100000, B00011110, B10010000, B11111110, B01010000, B11111110, B01010000, B11111110, B01010000, B11111110, B01010000, B00011110, B10010000, B00001110, B00100000, B00000110, B01000000, B00000010, B00000000,};
 const byte security[] PROGMEM = {16,12,B00011111,B10000000,B00100000,B01000000,B00100000,B01000000,B00100000,B01000000,B00100000,B01000000,B01111111,B11100000,B10000000,B00010000,B10000110,B00010000,B10000110,B00010000,B10000110,B00010000,B10000000,B00010000,B01111111,B11100000,};
+const byte about[] PROGMEM = {16,12,B00011111,B10000000,B00100000,B01000000,B01000110,B00100000,B10000110,B00010000,B10000000,B00010000,B10000110,B00010000,B10000110,B00010000,B10000110,B00010000,B10000110,B00010000,B01000110,B00100000,B00100000,B01000000,B00011111,B10000000,};
+const byte arrowLeft[] PROGMEM = {8,7,B00010000,B00110000,B01110000,B11110000,B01110000,B00110000,B00010000,};
+const byte arrowRight[] PROGMEM = {8,7,B10000000,B11000000,B11100000,B11110000,B11100000,B11000000,B10000000,};
 const unsigned short TextHelperPopup[0x5000] PROGMEM ={
   0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514,   // 0x0010 (16)
   0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514, 0xA514,   // 0x0020 (32)
@@ -2627,6 +2630,8 @@ const char* ca = \
 
 
 
+
+
 // This is where the magic begins!!!
 
 #include <MAKERphone.h>
@@ -3080,13 +3085,11 @@ bool currentStatus() {
 // ----- MAIN MENU -----
 // ---------------------
 // Borrowed from Ringo firmware settingsApp
-boolean colorSetup = 0;
 int32_t mainMenuYOffset;
-String mainMenuItems[5] PROGMEM = {
+String mainMenuItems[4] PROGMEM = {
   "Choose Network",
   "DHCP Settings",
-  "NTP Test",
-  "Chat Server",
+  "Tests Menu",
   "Update WiFiTest"
 };
 
@@ -3096,16 +3099,13 @@ bool showMainMenu() {
   {
     mp.inCall = 0;
     while (!mp.update());
-    input = mainMenu(mainMenuItems, 5, input);
+    input = mainMenu(mainMenuItems, 4, input);
     if (input == -1) break;
     if (input == 0) wifiConnect();
     if (input == 1) dhcpSettings();
-    if (input == 2) ntpTest();
-    if (input == 3) wifiChat();
-    if (input == 4) updateApp();
-    //if (input == 5)
-    //if(updateMenu())
-    //return true;
+    if (input == 2) showTestsMenu();
+    if (input == 3) updateApp();
+    
 
   }
   return -1;
@@ -3127,28 +3127,30 @@ void mainMenuDrawBox(String title, uint8_t i, int32_t y) {
   if (title == "DHCP Settings") //green
   {
     mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 2, 0x8FEA);
-    mp.display.drawBitmap(6, y + 2 * scale, composeIcon, 0x0341);
+    mp.display.drawBitmap(6, y + 2 * scale, about, 0x0341);
   }
-  if (title == "NTP Test") //yellow
+/*  if (title == "NTP Test") //yellow
   {
     mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 2, 0xFFED);
     mp.display.drawBitmap(6, y + 2 * scale, timeIcon, 0x6B60);
   }
-  if (title == "Chat Server")//blue
+*/
+  if (title == "Tests Menu")//blue
   {
     mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 2, 0xA7FF);
-    mp.display.drawBitmap(6, y + 2 * scale, soundIcon, 0x010F);
+    mp.display.drawBitmap(6, y + 3 * scale, arrowRight, 0x010F);
   }
   if (title == "Update WiFiTest")//purple
   {
     mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 2, 0xED1F);
     mp.display.drawBitmap(6, y + 2*scale, security, 0x600F);
   }
-  if (title == "About & update")//orange
+/*  if (title == "About & update")//orange
   {
     mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 2, 0xFD29);
-    //mp.display.drawBitmap(6, y + 2*scale, about, 0x8200);
+    mp.display.drawBitmap(6, y + 2*scale, about, 0x8200);
   }
+*/
   reconnectWiFi();
   if (WiFi.status() == WL_CONNECTED)
   {
@@ -3239,7 +3241,7 @@ int8_t mainMenu(String* title, uint8_t length, uint8_t _cursor) {
       break;
     }
 
-    if (mp.buttons.released(BTN_FUN_LEFT)/* || mp.buttons.released(BTN_FUN_RIGHT)*/) {
+    if (mp.buttons.released(BTN_FUN_LEFT)) {
       disconnectWiFi = !disconnectWiFi;
       if (disconnectWiFi) {
         WiFi.scanDelete();
@@ -3281,6 +3283,230 @@ int8_t mainMenu(String* title, uint8_t length, uint8_t _cursor) {
       //mp.osc->play();
       cursor++;
       if ((cursor * boxHeight + cameraY + mainMenuYOffset) > 128) {
+        cameraY -= boxHeight;
+      }
+      if (cursor >= length) {
+        cursor = 0;
+        cameraY = 0;
+
+      }
+      pressed = 1;
+    }
+
+
+    if (mp.buttons.released(BTN_B)) //BUTTON BACK
+    {
+      while (!mp.update());
+      return -1;
+    }
+  }
+
+  return cursor;
+
+}
+
+
+
+// ---------------------
+// ----- TESTS MENU -----
+// ---------------------
+// Borrowed from Ringo firmware settingsApp
+int32_t testsMenuYOffset;
+String testsMenuItems[3] PROGMEM = {
+  "Go back",
+  "NTP Test",
+  "Chat Server"
+};
+
+bool showTestsMenu() {
+  int8_t input = 0;
+  while (1)
+  {
+    mp.inCall = 0;
+    while (!mp.update());
+    input = testsMenu(testsMenuItems, 3, input);
+    if (input == -1) break;
+    if (input == 0) return -1;
+    if (input == 1) ntpTest();
+    if (input == 2) wifiChat();
+    
+
+  }
+  return -1;
+}
+
+void testsMenuDrawBox(String title, uint8_t i, int32_t y) {
+  uint8_t scale = 2;
+  uint8_t boxHeight = 20;
+  y += i * boxHeight + testsMenuYOffset;
+  if (y < 0 || y > mp.display.width()) {
+    return;
+  }
+
+/*  if (title == "Choose Network") //red
+  {
+    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 2, 0xFB6D);
+    mp.display.drawBitmap(6, y + 2 * scale, network, 0x7800);
+  }
+*/
+  if (title == "Go back") //green
+  {
+    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 2, 0x8FEA);
+    mp.display.drawBitmap(6, y + 3 * scale, arrowLeft, 0x0341);
+  }
+  if (title == "NTP Test") //yellow
+  {
+    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 2, 0xFFED);
+    mp.display.drawBitmap(6, y + 2 * scale, timeIcon, 0x6B60);
+  }
+  if (title == "Chat Server")//blue
+  {
+    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 2, 0xA7FF);
+    mp.display.drawBitmap(6, y + 2 * scale, composeIcon, 0x010F);
+  }
+/*  if (title == "Update WiFiTest")//purple
+  {
+    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 2, 0xED1F);
+    mp.display.drawBitmap(6, y + 2*scale, security, 0x600F);
+  }
+  if (title == "About & update")//orange
+  {
+    mp.display.fillRect(2, y + 1, mp.display.width() - 4, boxHeight - 2, 0xFD29);
+    //mp.display.drawBitmap(6, y + 2*scale, about, 0x8200);
+  }
+*/
+  reconnectWiFi();
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    currentRSSI = WiFi.RSSI();
+    mp.display.setTextFont(1);
+    mp.display.setTextColor(TFT_GREEN);
+    mp.display.setCursor(0, 115);
+    mp.display.print("Connected:");
+    mp.display.print(connectedToSSID);
+    mp.display.fillRect(139, 109, 19, 18, TFT_LIGHTGREY);
+    int strength = currentRSSI.toInt();
+    //> -50 full
+    // < -50 && > -75 high
+    // < -75 && > -95 low
+    // < -95 nosignal
+    if (strength > -50)
+      mp.display.drawBitmap(140, 110, signalFullIcon, TFT_GREEN, 2);
+    else if (strength <= -50 && strength > -75)
+      mp.display.drawBitmap(140, 110, signalHighIcon, TFT_GREEN, 2);
+    else if (strength <= -75 && strength > -95)
+      mp.display.drawBitmap(140, 110, signalLowIcon, TFT_YELLOW, 2);
+    else if (strength <= -95)
+      mp.display.drawBitmap(140, 110, noSignalIcon, TFT_RED, 2);
+    mp.display.setTextColor(TFT_BLACK);
+    mp.display.setCursor(140, 118);
+    mp.display.print(currentRSSI);
+
+  }
+  else
+  {
+    mp.display.setTextFont(1);
+    mp.display.setTextColor(TFT_YELLOW);
+    mp.display.setCursor(0, 115);
+    mp.display.print("NOT CONNECTED! (v");
+    mp.display.print(progVer);
+    mp.display.print(")");
+  }
+  mp.display.setTextColor(TFT_BLACK);
+  mp.display.setTextSize(1);
+  mp.display.setTextFont(2);
+  mp.display.drawString(title, 30, y + 2 );
+  mp.display.setTextColor(TFT_WHITE);
+  mp.display.setFreeFont(TT1);
+}
+
+void testsMenuDrawCursor(uint8_t i, int32_t y, bool pressed) {
+  uint8_t boxHeight = 20;
+  y += i * boxHeight + testsMenuYOffset;
+  mp.display.drawRect(0, y - 1, mp.display.width() - 1, boxHeight + 2, TFT_RED);
+  mp.display.drawRect(1, y, mp.display.width() - 3, boxHeight, TFT_RED);
+}
+
+int8_t testsMenu(String* title, uint8_t length, uint8_t _cursor) {
+  bool pressed = 0;
+  uint8_t cursor = _cursor;
+  int32_t cameraY = 0;
+  int32_t cameraY_actual = 0;
+  uint8_t boxHeight = 20;
+  bool blinkState = 0;
+  uint32_t blinkMillis = millis();
+  while (1) {
+    mp.update();
+    mp.display.fillScreen(TFT_BLACK);
+    mp.display.setCursor(0, 0);
+    cameraY_actual = (cameraY_actual + cameraY) / 2;
+    if (cameraY_actual - cameraY == 1) {
+      cameraY_actual = cameraY;
+    }
+    if (millis() - blinkMillis > 350)
+    {
+      blinkMillis = millis();
+      blinkState = !blinkState;
+    }
+    for (uint8_t i = 0; i < length; i++) {
+      testsMenuDrawBox(title[i], i, cameraY_actual);
+    }
+    if (blinkState)
+      testsMenuDrawCursor(cursor, cameraY_actual, pressed);
+
+    if (mp.buttons.timeHeld(BTN_DOWN) == 0 && mp.buttons.timeHeld(BTN_UP) == 0)
+      pressed = 0;
+
+    if (mp.buttons.released(BTN_A)) {   //BUTTON CONFIRM
+      //mp.osc->note(75, 0.05);
+      //mp.osc->play();
+
+      while (!mp.update()); // Exit when pressed
+      break;
+    }
+
+    if (mp.buttons.released(BTN_FUN_LEFT)) {
+      disconnectWiFi = !disconnectWiFi;
+      if (disconnectWiFi) {
+        WiFi.scanDelete();
+        WiFi.disconnect(true); delay(10); // disable WIFI altogether
+        WiFi.mode(WIFI_MODE_NULL); delay(10);
+        while (!mp.update());
+      }
+      else reconnectWiFi();
+    }
+
+    if (mp.buttons.released(BTN_FUN_RIGHT)) {
+      while(!currentStatus());
+    }
+
+    if (mp.buttons.pressed(BTN_UP)) {  //BUTTON UP
+      blinkState = 1;
+      blinkMillis = millis();
+      //mp.osc->note(75, 0.05);
+      //mp.osc->play();
+      if (cursor == 0) {
+        cursor = length - 1;
+        if (length > 6) {
+          cameraY = -(cursor - 2) * boxHeight;
+        }
+      }
+      else {
+        cursor--;
+        if (cursor > 0 && (cursor * boxHeight + cameraY + testsMenuYOffset) < boxHeight) {
+          cameraY += 15;
+        }
+      }
+      pressed = 1;
+    }
+
+    if (mp.buttons.pressed(BTN_DOWN)) { //BUTTON DOWN
+      blinkState = 1;
+      blinkMillis = millis();
+      //mp.osc->note(75, 0.05);
+      //mp.osc->play();
+      cursor++;
+      if ((cursor * boxHeight + cameraY + testsMenuYOffset) > 128) {
         cameraY -= boxHeight;
       }
       if (cursor >= length) {
@@ -4758,7 +4984,7 @@ void updateApp() {
   
   mp.display.println("Starting update!");
   String curVerName = String("/WiFiTest/WiFiTest.v" + String(progVer.charAt(0)) + String(progVer.charAt(2)) + String(progVer.charAt(4)) + ".bin");
-  dblPr("Backup old ver..."); Serial.println();
+  dblPr("Backup old version..."); Serial.println();
   mp.display.pushSprite(0, 0);
   if (copyFile("/WiFiTest/WiFiTest.bin", curVerName)) dblPr("DONE!", 1);
   else {
@@ -4785,7 +5011,7 @@ void updateApp() {
       dblPr("ERROR!", 1);
       updateFile.close();
       http.end();
-      dblPr("Restore old ver..."); Serial.println();
+      dblPr("Restore old version..."); Serial.println();
       mp.display.pushSprite(0, 0);
       if (copyFile(curVerName, "/WiFiTest/WiFiTest.bin"))
         SD.remove(curVerName);
@@ -4799,7 +5025,7 @@ void updateApp() {
     dblPr("ERROR!", 1);
     updateFile.close();
     http.end();
-    dblPr("Restore old ver..."); Serial.println();
+    dblPr("Restore old version..."); Serial.println();
     mp.display.pushSprite(0, 0);
     if (copyFile(curVerName, "/WiFiTest/WiFiTest.bin"))
       SD.remove(curVerName);
@@ -4813,7 +5039,7 @@ void updateApp() {
   if (!updateFile.size()) {
     dblPr("ERROR! File size = 0", 1);
     updateFile.close();
-    dblPr("Restore old ver..."); Serial.println();
+    dblPr("Restore old version..."); Serial.println();
     mp.display.pushSprite(0, 0);
     if (copyFile(curVerName, "/WiFiTest/WiFiTest.bin"))
       SD.remove(curVerName);
