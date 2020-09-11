@@ -6,6 +6,7 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 ![Screenshot](WiFiTest_screenshot.jpg)
 
 ![Screenshot](WiFiTest_DHCPSettings_screenshot.jpg)
+
 ![Screenshot](WiFiTest_ChatServer_screenshot.jpg)
 
 ## **v1.2.6 - The More Menus, the Merrier!**
