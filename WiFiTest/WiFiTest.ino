@@ -4874,18 +4874,16 @@ void wifiChat() {
           while (!clients[i].available()) delay(50);
           char buffer[32];
           int count = clients[i].read((byte*)buffer, 32);
-          if (buffer[0] > 31 && buffer[0] < 128) { 
+          if (buffer[0] > 31 && buffer[0] < 128 ) { 
             clientName[i] = "";
             for (byte j = 0; j < count; j++) {
               if (buffer[j] > 31 && buffer[j] < 128) clientName[i] += buffer[j];              
             }
-            if (buffer[0] > 31 && buffer[0] < 128) {
               Serial.print("Client ");
               Serial.print(i);
               Serial.print(" name set to '");
               Serial.print(clientName[i]);
               Serial.println("'");
-            }
           }
           if (mp.display.getCursorY() > 120) {
             mp.display.fillScreen(TFT_BLACK);
@@ -4917,6 +4915,12 @@ void wifiChat() {
               clients[j].print("[SERVER]: ");
               clients[j].print(clientName[i]);
               clients[j].println(" connected!");
+              clients[j].println("~ Currently in this Room ~");
+              for (byte k = 0; k < maxClients; k++) {
+                if (clients[k].connected()) {
+                  clients[j].print("   "); clients[j].println(clientName[k]);
+                }
+              }
               clients[j].println();
               clients[j].flush();
             }
