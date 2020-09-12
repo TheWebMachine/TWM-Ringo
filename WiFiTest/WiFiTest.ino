@@ -7,7 +7,7 @@
  * A lot of code was sourced from https://github.com/CircuitMess/
  * and the Arduino Tutorials and Examples. Do with it what you will.
 */
-const String progVer= "1.2.6";
+const String progVer= "1.3.0";
 
 // ----------------------------------------
 // -----       PROGRAM CONSTANTS      -----
@@ -2640,6 +2640,8 @@ bool helpPop;
 File origFile;
 File destFile;
 
+WiFiServer telnetServer(23);  // We need to declare the Chat Server early so we can launch into it more than once. (fixes redeclaration within function bug)
+
 char updateURL[] = "https://raw.githubusercontent.com/TheWebMachine/TWM-Ringo/master/WiFiTest/WiFiTest.bin";
 File updateFile;
 
@@ -4818,9 +4820,9 @@ void wifiChat() {
   disconnectWiFi = 0;
   reconnectWiFi();
   while (!mp.update());
-  WiFiServer server(23);
   WiFiClient clients[maxClients];
-  boolean alreadyConnected = false; // whether or not the client was connected previously
+  String clientName[maxClients];
+  boolean alreadyConnected = false;
   mp.display.fillScreen(TFT_BLACK);
   mp.display.setCursor(0, 0);
   mp.display.setTextSize(1);
@@ -4841,24 +4843,8 @@ void wifiChat() {
     delay(2000);
     return;
   }
-  if (rebootNeeded)
-  {
-    mp.display.setTextColor(TFT_BLACK);
-    mp.display.setTextSize(1);
-    mp.display.setTextFont(2);
-    mp.display.drawRect(4, 49, 152, 28, TFT_BLACK);
-    mp.display.drawRect(3, 48, 154, 30, TFT_BLACK);
-    mp.display.fillRect(5, 50, 150, 26, 0xFD29);
-    mp.display.setCursor(47, 54);
-    mp.display.printCenter("Reboot needed! :(");
-    Serial.println("Reboot needed! :(");
-    while (!mp.update());
-    delay(2000);
-    return;
-  }
-  else rebootNeeded = 1;
   Serial.print("Starting server on port 23...");
-  server.begin();
+  telnetServer.begin();
   Serial.println("done.");
   Serial.println("check for IP");
   ip = WiFi.localIP();
@@ -4873,26 +4859,66 @@ void wifiChat() {
 
   while (1) {
     // check for any new client connecting, and say hello (before any incoming data)
-    WiFiClient newClient = server.accept();
+    WiFiClient newClient = telnetServer.accept();
     if (newClient) {
       for (byte i = 0; i < maxClients; i++) {
         if (!clients[i]) {
+          clients[i] = newClient;
+          clientName[i] = String("#" + i);
           Serial.print("We have a new client #");
           Serial.println(i);
-          newClient.flush();
-          newClient.print("Hello, client number: ");
-          newClient.println(i);
-          mp.display.print("Hello, client number: ");
-          mp.display.println(i);
-          while (!mp.update());
-          // Once we "accept", the client is no longer tracked by EthernetServer
-          // so we must store it into our list of clients
-          clients[i] = newClient;
+          clients[i].print("[SERVER]: Hello, client #");
+          clients[i].println(i);
+          clients[i].println("[SERVER]: Please type your name and press ENTER: ");
+          clients[i].flush();
+          while (!clients[i].available()) delay(50);
+          char buffer[32];
+          int count = clients[i].read((byte*)buffer, 32);
+          if (buffer[0] > 31 && buffer[0] < 128) { 
+            clientName[i] = "";
+            for (byte j = 0; j < count; j++) {
+              if (buffer[j] > 31 && buffer[j] < 128) clientName[i] += buffer[j];              
+            }
+            if (buffer[0] > 31 && buffer[0] < 128) {
+              Serial.print("Client ");
+              Serial.print(i);
+              Serial.print(" name set to '");
+              Serial.print(clientName[i]);
+              Serial.println("'");
+            }
+          }
+          if (mp.display.getCursorY() > 120) {
+            mp.display.fillScreen(TFT_BLACK);
+            mp.display.setCursor(0, 0);
+            mp.display.setTextSize(1);
+            mp.display.setTextFont(1);
+            mp.display.setTextColor(TFT_GREEN);
+            mp.display.print("Telnet: ");
+            mp.display.print(ip);
+            mp.display.setTextColor(TFT_YELLOW);
+            mp.display.println(":23");
+            mp.display.setTextColor(TFT_WHITE);
+          }
+          mp.display.print(clientName[i]);
+          mp.display.println(" connected!");
+          mp.display.pushSprite(0, 0);
+          
+          clients[i].println("~ Currently in this Room ~");
+          for (byte j = 0; j < maxClients; j++) {
+            if (clients[j].connected()) {
+              clients[i].print("   "); clients[i].println(clientName[j]);
+            }
+          }
+          clients[i].println();
+                    
           for (byte j = 0; j < maxClients; j++) {
             if (j != i && clients[j].connected()) {
-              clients[j].print("Client number ");
-              clients[j].print(i);
+              //clients[j].print("Client number ");
+              clients[j].print("[SERVER]: ");
+              clients[j].print(clientName[i]);
               clients[j].println(" connected!");
+              clients[j].println();
+              clients[j].flush();
             }
           }
           break;
@@ -4908,23 +4934,27 @@ void wifiChat() {
         byte buffer[5120];
         int count = clients[i].read(buffer, 5120);
         // write the bytes to all other connected clients
-        if (buffer[0] != 255 && buffer[0] != 13) { 
+        if (buffer[0] > 31 && buffer[0] < 128) { 
           for (byte j = 0; j < maxClients; j++) {
             if (j != i && clients[j].connected()) {
-              clients[j].print("[Client ");
-              clients[j].print(i);
+              clients[j].print("[");
+              clients[j].print(clientName[i]);
               clients[j].print("]: ");
               clients[j].write(buffer, count);
               clients[j].println();
+              clients[j].flush();
             }
           }
         }
-        Serial.print("[Client ");
-        Serial.print(i);
-        Serial.print("]: ");
-        Serial.write(buffer, count);
-        Serial.println();
+        if (buffer[0] > 31 && buffer[0] < 128) {
+          Serial.print("[");
+          Serial.print(clientName[i]);
+          Serial.print("]: ");
+          Serial.write(buffer, count);
+          Serial.println();
+        }
       }
+      clients[i].flush();
     }
 
     // stop any clients which disconnect
