@@ -9,7 +9,7 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 
 ![Screenshot](WiFiTest_ChatServer_screenshot.jpg)
 
-## **v1.2.6 - The More Menus, the Merrier!**
+## **v1.3.0 - I got your Chat Server right here!**
 
 **Main Menu:**
  * **Choose Network** - You'll need to connect to your Wifi network before you do anything else. Your network settings are saved to the SD card
@@ -20,6 +20,7 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
     * **NTP Test** - The first test added to this app, originally written by Frank Prindle
     * **Chat Server** - A Telnet chat server for multiple clients to connect to. 
       * PuTTY works well with this (duplicate multiple sessions to see it in action)
+      * You'll be asked your name when you connect, allowing messages to be more easily identified by sender
       * Messages sent by one client are sent to all other connected clients, but _NOT_ to the originating client
  * **Update WiFiTest** - This will download the latest WiFiTest.bin from this repo to your SD card, _so you don't have to!_ It backs up the current version to WiFiTest.v###.bin before starting the download. Once new version is downloaded, you are taken back to the Ringo loader so you can launch the new version **(HUGE thanks to Frank for helping me to get this working!)**
  * `Left Softkey` will toggle the WiFi network connection on/off
@@ -46,13 +47,21 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 **Chat Server Instructions:**
  * This app will show you the current IP of the Ringo (and a reminder that telnet is port 23)
  * Use a telnet client like PuTTY to connect
+ * You'll be asked for your Name when you connect. This is **mandatory** (do **not** leave blank; minor bug there) and will be used to identify your messages to other clients
  * To see it actually work, you need more than one client connected at a time, as messages will not be repeated on the originating client
  * Press `B` to return to the Main Menu
- * _KNOWN BUG: After you have run the Chat Server once, you'll have to reboot before it can be ran again. Connections will be refused on subsequent runs without reboot. Still sorting this out. You will be reminded to reboot if you try to run it a second time._
+ * _The reboot bug has been fixed. You may now enter and exit the Chat Server as many times as you want; no reboot needed! :-)_
 -----
 -----
 _**Recent Changes:**_
- * Make Chat Server prettier by showing when client connects, which client sent message, and increase message buffer to 5k to prevent fragmentation
+ * Major revamp to **Chat Server**: 
+   * Setting client's Name on connect
+   * Showing when client connects
+   * Show which client sent message
+   * Better Server messages to clients
+   * Better filtering of message data to strip unwanted telnet garbage
+   * increase message buffer to 5k to prevent fragmentation
+ * FIX: Chat Server can now be ran multiple times without needing a reboot
  * Add Test Menu and move tests to that sub-menu
  * Added Splash screen at app launch
  * Added **Update WiFiTest** to download the latest .bin to your SD card
