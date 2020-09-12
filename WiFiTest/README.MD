@@ -56,7 +56,8 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 _**Recent Changes:**_
  * Major revamp to **Chat Server**: 
    * Setting client's Name on connect
-   * Showing when client connects
+   * Show when client connects
+   * Show a list of connected clients
    * Show which client sent message
    * Better Server messages to clients
    * Better filtering of message data to strip unwanted telnet garbage
