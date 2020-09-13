@@ -52,8 +52,8 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
  * To see it actually work, you need more than one client connected at a time, as messages will not be repeated on the originating client
  * Press `B` to return to the Main Menu
  * _The reboot bug has been fixed. You may now enter and exit the Chat Server as many times as you want; no reboot needed! :-)_
- * **NEW!** Command sequences are available and follow the format `~X param` where `X` is a single letter designation for the command being requested. `param` is optional depending on the command requested
-    * `~L` - This will show you the list of connected clients. It takes no `param`
+ * **NEW!** Command sequences are available and follow the format `~X param` where `X` is a single letter designation for the command being requested. `param` depends on the command requested and consists of the rest of the sent buffer (ASCII 32-127 only)
+    * `~L` - This will show you the list of connected clients. It completely ignores `param`
     * `~N NewName` - This lets you change your Name to `NewName`. Spaces are permitted in `NewName`
 ![Screenshot](WiFiTest_ChatServer_CMD_screenshot.jpg)
 -----
