@@ -9,7 +9,7 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
 
 ![Screenshot](WiFiTest_ChatServer_screenshot.jpg)
 
-## **v1.3.0 - I got your Chat Server right here!**
+## **v1.3.1 - I got your Chat Server right here!**
 
 **Main Menu:**
  * **Choose Network** - You'll need to connect to your Wifi network before you do anything else. Your network settings are saved to the SD card
@@ -22,6 +22,7 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
       * PuTTY works well with this (duplicate multiple sessions to see it in action)
       * You'll be asked your name when you connect, allowing messages to be more easily identified by sender
       * Messages sent by one client are sent to all other connected clients, but _NOT_ to the originating client
+      * Now with Command sequences! (See below)
  * **Update WiFiTest** - This will download the latest WiFiTest.bin from this repo to your SD card, _so you don't have to!_ It backs up the current version to WiFiTest.v###.bin before starting the download. Once new version is downloaded, you are taken back to the Ringo loader so you can launch the new version **(HUGE thanks to Frank for helping me to get this working!)**
  * `Left Softkey` will toggle the WiFi network connection on/off
  * `Right Softkey` will show Current Status screen with network information
@@ -51,10 +52,15 @@ first draft of this code. It is definitely a WIP, but the hope is to expand it i
  * To see it actually work, you need more than one client connected at a time, as messages will not be repeated on the originating client
  * Press `B` to return to the Main Menu
  * _The reboot bug has been fixed. You may now enter and exit the Chat Server as many times as you want; no reboot needed! :-)_
+ * **NEW!** Command sequences are available and follow the format `~X param` where `X` is a single letter designation for the command being requested. `param` is optional depending on the command requested
+    * `~L` - This will show you the list of connected clients. It takes no `param`
+    * `~N NewName` - This lets you change your Name to `NewName`. Spaces are permitted in `NewName`
+![Screenshot](WiFiTest_ChatServer_CMD_screenshot.jpg)
 -----
 -----
 _**Recent Changes:**_
  * Major revamp to **Chat Server**: 
+   * Added the first Command sequences (`~X param`)
    * Setting client's Name on connect
    * Show when client connects
    * Show a list of connected clients
