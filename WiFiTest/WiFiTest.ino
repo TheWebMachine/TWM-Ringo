@@ -7,7 +7,7 @@
  * A lot of code was sourced from https://github.com/CircuitMess/
  * and the Arduino Tutorials and Examples. Do with it what you will.
 */
-const String progVer= "1.3.0";
+const String progVer= "1.3.1";
 
 // ----------------------------------------
 // -----       PROGRAM CONSTANTS      -----
@@ -2641,6 +2641,9 @@ File origFile;
 File destFile;
 
 WiFiServer telnetServer(23);  // We need to declare the Chat Server early so we can launch into it more than once. (fixes redeclaration within function bug)
+const int maxClients = 32;
+WiFiClient clients[maxClients];
+String clientName[maxClients];
 
 char updateURL[] = "https://raw.githubusercontent.com/TheWebMachine/TWM-Ringo/master/WiFiTest/WiFiTest.bin";
 File updateFile;
@@ -4814,14 +4817,27 @@ void ntpTest()
 // --------------------------
 // ----- WiFiChatServer -----
 // --------------------------
+void printTelnetHeader() {
+  mp.display.fillScreen(TFT_BLACK);
+  mp.display.setCursor(0, 0);
+  mp.display.setTextSize(1);
+  mp.display.setTextFont(1);
+  mp.display.setTextColor(TFT_GREEN);
+  mp.display.print("Telnet: ");
+  mp.display.print(ip);
+  mp.display.setTextColor(TFT_YELLOW);
+  mp.display.println(":23");
+  mp.display.setTextColor(TFT_WHITE);
+  mp.display.pushSprite(0, 0);
+}
+
 void wifiChat() {
-  int maxClients = 8;
   mp.inCall = 1;
   disconnectWiFi = 0;
   reconnectWiFi();
   while (!mp.update());
-  WiFiClient clients[maxClients];
-  String clientName[maxClients];
+  
+  
   boolean alreadyConnected = false;
   mp.display.fillScreen(TFT_BLACK);
   mp.display.setCursor(0, 0);
@@ -4849,12 +4865,7 @@ void wifiChat() {
   Serial.println("check for IP");
   ip = WiFi.localIP();
   Serial.println(ip);
-  mp.display.setTextColor(TFT_GREEN);
-  mp.display.print("Telnet: ");
-  mp.display.print(ip);
-  mp.display.setTextColor(TFT_YELLOW);
-  mp.display.println(":23");
-  mp.display.setTextColor(TFT_WHITE);
+  printTelnetHeader();
   while (!mp.update());
 
   while (1) {
@@ -4871,34 +4882,22 @@ void wifiChat() {
           clients[i].println(i);
           clients[i].println("[SERVER]: Please type your name and press ENTER: ");
           clients[i].flush();
-          while (!clients[i].available()) delay(50);
+          while (clients[i].connected() && !clients[i].available()) delay(50);
           char buffer[32];
           int count = clients[i].read((byte*)buffer, 32);
           if (buffer[0] > 31 && buffer[0] < 128 ) { 
             clientName[i] = "";
             for (byte j = 0; j < count; j++) {
-              if (buffer[j] > 31 && buffer[j] < 128) clientName[i] += buffer[j];              
+              if (buffer[j] > 31 && buffer[j] < 128) clientName[i] += char(buffer[j]);              
             }
-              Serial.print("Client ");
-              Serial.print(i);
-              Serial.print(" name set to '");
-              Serial.print(clientName[i]);
-              Serial.println("'");
+            Serial.print("Client ");
+            Serial.print(i);
+            Serial.print(" name set to '");
+            Serial.print(clientName[i]);
+            Serial.println("'");
           }
-          if (mp.display.getCursorY() > 120) {
-            mp.display.fillScreen(TFT_BLACK);
-            mp.display.setCursor(0, 0);
-            mp.display.setTextSize(1);
-            mp.display.setTextFont(1);
-            mp.display.setTextColor(TFT_GREEN);
-            mp.display.print("Telnet: ");
-            mp.display.print(ip);
-            mp.display.setTextColor(TFT_YELLOW);
-            mp.display.println(":23");
-            mp.display.setTextColor(TFT_WHITE);
-          }
-          mp.display.print(clientName[i]);
-          mp.display.println(" connected!");
+          if (mp.display.getCursorY() > 120) printTelnetHeader();
+          mp.display.println(String(clientName[i] + " (" + i + ") connected!"));
           mp.display.pushSprite(0, 0);
           
           clients[i].println("~ Currently in this Room ~");
@@ -4912,9 +4911,7 @@ void wifiChat() {
           for (byte j = 0; j < maxClients; j++) {
             if (j != i && clients[j].connected()) {
               //clients[j].print("Client number ");
-              clients[j].print("[SERVER]: ");
-              clients[j].print(clientName[i]);
-              clients[j].println(" connected!");
+              clients[j].println(String("[SERVER]: " + clientName[i] + " connected!"));
               clients[j].println("~ Currently in this Room ~");
               for (byte k = 0; k < maxClients; k++) {
                 if (clients[k].connected()) {
@@ -4939,6 +4936,18 @@ void wifiChat() {
         int count = clients[i].read(buffer, 5120);
         // write the bytes to all other connected clients
         if (buffer[0] > 31 && buffer[0] < 128) { 
+          if (buffer[0] == 126) {
+            String param = "";
+            for (byte j = 3; j < count; j++) {
+              if (buffer[j] > 31 && buffer[j] < 128) param += char(buffer[j]);              
+            }
+            if (mp.display.getCursorY() > 120) printTelnetHeader();
+            dblPr(String("[" + clientName[i] + "]: ~" + (char)buffer[1] + " " + param), 1);
+            mp.display.pushSprite(0, 0);
+            wifiChatCMD(i, buffer[1], param);
+            clients[i].flush();
+            break;
+          }
           for (byte j = 0; j < maxClients; j++) {
             if (j != i && clients[j].connected()) {
               clients[j].print("[");
@@ -4966,8 +4975,9 @@ void wifiChat() {
       if (clients[i] && !clients[i].connected()) {
         Serial.print("disconnect client #");
         Serial.println(i);
-        mp.display.print("Disconnect client number: ");
-        mp.display.println(i);
+        if (mp.display.getCursorY() > 120) printTelnetHeader();
+        //mp.display.print("Disconnect client number: ");
+        //mp.display.println(i);
         dblPr("Disconnect client #: ");
         dblPr(String(i), 1);
         while (!mp.update());
@@ -4985,6 +4995,7 @@ void wifiChat() {
           //Serial.println(i);
           //mp.display.print("Disconnect client #: ");
           //mp.display.println(i);
+          if (mp.display.getCursorY() > 100) printTelnetHeader();
           dblPr("Disconnect client #: ");
           dblPr(String(i), 1);
           while (!mp.update());
@@ -4993,6 +5004,49 @@ void wifiChat() {
       }
       delay(1000);
       return;
+    }
+  }
+}
+
+void wifiChatCMD(byte clientID, byte cmd, String param) {
+  switch (char(cmd)) {
+    case 'N': { // N - Change own client name
+      if (!param.length() > 0) {
+        clients[clientID].println(String("[SERVER]: INVALID PARAM '" + param + "'"));
+        clients[clientID].println();
+      }
+      else {
+        String oldClientName = clientName[clientID];
+        clientName[clientID] = param;
+        clients[clientID].print("[SERVER]: Name changed to: "); clients[clientID].println(clientName[clientID]);
+        clients[clientID].println();
+        for (byte j = 0; j < maxClients; j++) {
+          if (j != clientID && clients[j].connected()) {
+            clients[j].print("[SERVER]: ");
+            clients[j].print(oldClientName); 
+            clients[j].print(" changed Name to "); 
+            clients[j].println(clientName[clientID]);
+            clients[j].println();
+            clients[j].flush();
+          }
+        }
+      }
+      break;
+    }
+    case 'L': { // L - List connected clients
+      clients[clientID].println("~ Currently in this Room ~");
+      for (byte j = 0; j < maxClients; j++) {
+        if (clients[j].connected()) {
+          clients[clientID].print("   "); clients[clientID].println(clientName[j]);
+        }
+      }
+      clients[clientID].println();
+      break;
+    }
+    default: { // INVALID COMMAND!
+      clients[clientID].print("[SERVER]: INVALID COMMAND ~"); clients[clientID].println(char(cmd));
+      clients[clientID].println();
+      break;
     }
   }
 }
